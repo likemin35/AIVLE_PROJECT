@@ -1,85 +1,88 @@
 package millie.domain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import javax.persistence.*;
 import lombok.Data;
 import millie.AiApplication;
 import millie.domain.PublicationFailed;
 import millie.domain.Published;
 
+import javax.persistence.*;
+
 @Entity
 @Table(name = "Publishing_table")
 @Data
-//<<< DDD / Aggregate Root
 public class Publishing {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String image;
-
-    private String summaryContent;
-
-    private String bookName;
-
-    private String pdfPath;
-
-    private String authorId;
-
-    private String webUrl;
-
-    private String category;
-
-    private Integer cost;
+    private String image;             // AI 생성 표지 이미지 URL
+    private String summaryContent;    // 요약 내용
+    private String bookName;          // 제목
+    private String pdfPath;           // PDF 경로
+    private String authorId;          // 저자 ID
+    private String webUrl;            // 웹 주소
+    private String category;          // 장르 (소설, 에세이 등)
+    private Integer cost;             // 가격 (연속형)
 
     @Embedded
     private ManuscriptId manuscriptId;
 
+    // Repository 접근
     public static PublishingRepository repository() {
-        PublishingRepository publishingRepository = AiApplication.applicationContext.getBean(
-            PublishingRepository.class
-        );
-        return publishingRepository;
+        return AiApplication.applicationContext.getBean(PublishingRepository.class);
     }
 
-    //<<< Clean Arch / Port Method
-    public static void publish(PublishingRequested publishingRequested) {
-        //implement business logic here:
+    // AI Client 접근
+    private static final AiClient aiClient = AiApplication.applicationContext.getBean(AiClient.class);
 
-        /** Example 1:  new item 
-        Publishing publishing = new Publishing();
-        repository().save(publishing);
+    // 핵심 기능: publish()
+    public static void publish(PublishingRequested event) {
+        try {
+            // 1. 새로운 Publishing 인스턴스 생성
+            Publishing publishing = new Publishing();
+            publishing.setBookName(event.getTitle());
+            publishing.setAuthorId(event.getAuthorId().toString());
+            publishing.setCategory(event.getCategory() != null ? event.getCategory() : "소설");
+            publishing.setPdfPath("default.pdf"); // 추후 설정
+            publishing.setWebUrl(event.getWebUrl() != null ? event.getWebUrl() : "https://millie.co.kr");
 
-        Published published = new Published(publishing);
-        published.publishAfterCommit();
-        */
+            // 2. 책 내용 요약
+            String summary = aiClient.summarizeContent(event.getContent());
+            publishing.setSummaryContent(summary);
 
-        /** Example 2:  finding and process
-        
-        // if publishingRequested.authorId exists, use it
-        
-        // ObjectMapper mapper = new ObjectMapper();
-        // Map<Long, Object> manuscriptMap = mapper.convertValue(publishingRequested.getAuthorId(), Map.class);
+            // 3. 표지 이미지 생성
+            String imageUrl = aiClient.generateCover(summary, event.getTitle(), publishing.getCategory());
+            publishing.setImage(imageUrl);
 
-        repository().findById(publishingRequested.get???()).ifPresent(publishing->{
-            
-            publishing // do something
+            // 4. 연속형 가격 예측 (AI 기반, 1000 ~ 10000)
+            int predictedCost = aiClient.predictBookPrice(
+                event.getTitle(),
+                summary,
+                publishing.getCategory(),
+                event.getContent()
+            );
+            publishing.setCost(predictedCost);
+
+            // 5. 저장 및 성공 이벤트 발행
             repository().save(publishing);
-
             Published published = new Published(publishing);
             published.publishAfterCommit();
 
-         });
-        */
+        } catch (Exception e) {
+            // 6. 실패 시 최소 정보만 포함한 객체 생성
+            Publishing failed = new Publishing();
+            failed.setBookName(event.getTitle());
+            failed.setAuthorId(event.getAuthorId().toString());
+            failed.setCategory(event.getCategory() != null ? event.getCategory() : "소설");
+            failed.setSummaryContent("요약 실패");
+            failed.setImage("이미지 생성 실패");
+            failed.setCost(1000); // 기본값
 
+            repository().save(failed);
+            PublicationFailed failEvent = new PublicationFailed(failed);
+            failEvent.publishAfterCommit();
+        }
     }
-    //>>> Clean Arch / Port Method
-
 }
-//>>> DDD / Aggregate Root
