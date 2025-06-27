@@ -37,4 +37,31 @@ public class WritingController {
         manuscriptRepository.save(manuscript);
         return ResponseEntity.ok().build();
     }
+    
+    @PutMapping("/{id}")
+public ResponseEntity<?> updateManuscript(@PathVariable Long id, @RequestBody RegisterManuscriptCommand cmd) {
+    Manuscript manuscript = manuscriptRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("원고를 찾을 수 없습니다."));
+    manuscript.setTitle(cmd.getTitle());
+    manuscript.setContent(cmd.getContent());
+    // 필요하면 상태도 변경 가능
+    manuscriptRepository.save(manuscript);
+    return ResponseEntity.ok().build();
+}
+@GetMapping("/{id}")
+public ResponseEntity<Manuscript> getManuscript(@PathVariable Long id) {
+    Manuscript manuscript = manuscriptRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("원고를 찾을 수 없습니다."));
+    return ResponseEntity.ok(manuscript);
+}
+@DeleteMapping("/{id}")
+public ResponseEntity<?> deleteManuscript(@PathVariable Long id) {
+    if (!manuscriptRepository.existsById(id)) {
+        return ResponseEntity.notFound().build();
+    }
+    manuscriptRepository.deleteById(id);
+    return ResponseEntity.ok().build();
+}
+
+
 }
