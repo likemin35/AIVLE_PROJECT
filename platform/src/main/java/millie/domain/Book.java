@@ -28,13 +28,12 @@ public class Book {
 
     private Boolean isBestSeller;
 
-    // private String authorName;
+    private String authorName;
 
     private Integer viewCount;
 
     private Integer point;
 
-    // private Integer cost;
 
     public static BookRepository repository() {
         BookRepository bookRepository = PlatformApplication.applicationContext.getBean(
@@ -51,6 +50,7 @@ public class Book {
 
         book.setBookName(published.getBookName());
         book.setCategory(published.getCategory());
+        
         // book.setIsBestSeller();
         
 

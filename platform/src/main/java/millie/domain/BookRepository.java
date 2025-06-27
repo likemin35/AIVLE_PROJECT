@@ -14,7 +14,7 @@ public interface BookRepository extends PagingAndSortingRepository<Book, Long> {
     @Query(
         value = "select book " +
         "from Book book " +
-        "where(:id is null or book.id = :id) and (:bookName is null or book.bookName like %:bookName%) and (:category is null or book.category like %:category%) and (book.isBestSeller = :isBestSeller) and (:authorName is null or book.authorName like %:authorName%) and (:viewCount is null or book.viewCount = :viewCount) and (:point is null or book.point = :point)"
+        "where(:id is null or book.id = :id) and (:bookName is null or book.bookName like %:bookName%) and (:category is null or book.category like %:category%) and (isBestSeller is null or book.isBestSeller = :isBestSeller) and (:authorName is null or book.authorName like %:authorName%) and (:viewCount is null or book.viewCount = :viewCount) and (:point is null or book.point = :point)"
     )
     List<Book> viewBook(
         Long id,
