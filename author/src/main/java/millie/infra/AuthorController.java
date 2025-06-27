@@ -22,7 +22,7 @@ public class AuthorController {
 
     @RequestMapping(
         value = "/authors/{id}/approveauthor",
-        method = RequestMethod.PUT,
+        method = RequestMethod.PATCH,
         produces = "application/json;charset=UTF-8"
     )
     public Author approveAuthor(
@@ -44,7 +44,7 @@ public class AuthorController {
 
     @RequestMapping(
         value = "/authors/{id}/disapproveauthor",
-        method = RequestMethod.PUT,
+        method = RequestMethod.PATCH,
         produces = "application/json;charset=UTF-8"
     )
     public Author disapproveAuthor(
