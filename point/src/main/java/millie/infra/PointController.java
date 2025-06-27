@@ -19,5 +19,16 @@ public class PointController {
 
     @Autowired
     PointRepository pointRepository;
+
+    @PostMapping("/purchase")
+    public void purchasePoint(@RequestBody PurchasePointRequest request) {
+        Optional<Point> optionalPoint = pointRepository.findByUserIdAndSubscriptionId(
+            request.getUserId(), request.getSubscriptionId()
+        );
+
+        optionalPoint.ifPresent(point -> {
+            point.buyPoint(request.getAmount()); // 도메인 로직 호출
+            pointRepository.save(point); // 변경사항 저장
+        });
+    }
 }
-//>>> Clean Arch / Inbound Adaptor

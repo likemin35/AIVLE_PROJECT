@@ -9,6 +9,6 @@ public class GetPointQuery {
     private Long id;
     private Integer point;
     private Boolean isSubscribe;
-    private UserId userId;
-    private SubscriptionId subscriptionId;
+    private Long userId;
+    private Long subscriptionId;
 }

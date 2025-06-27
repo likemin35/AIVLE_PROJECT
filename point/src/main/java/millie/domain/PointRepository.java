@@ -21,8 +21,12 @@ public interface PointRepository
         Long id,
         Integer point,
         Boolean isSubscribe,
-        UserId userId,
-        SubscriptionId subscriptionId,
+        Long userId,
+        Long subscriptionId,
         Pageable pageable
     );
+
+    Optional<Point> findByUserIdAndSubscriptionId(Long userId, Long subscriptionId);
 }
+
+
