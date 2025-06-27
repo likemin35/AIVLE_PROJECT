@@ -28,13 +28,13 @@ public class Book {
 
     private Boolean isBestSeller;
 
-    private String authorName;
+    // private String authorName;
 
     private Integer viewCount;
 
     private Integer point;
 
-    private Integer cost;
+    // private Integer cost;
 
     public static BookRepository repository() {
         BookRepository bookRepository = PlatformApplication.applicationContext.getBean(
@@ -45,15 +45,19 @@ public class Book {
 
     //<<< Clean Arch / Port Method
     public static void registerBook(Published published) {
-        //implement business logic here:
-
-        /** Example 1:  new item 
+        
         Book book = new Book();
         repository().save(book);
 
+        book.setBookName(published.getBookName());
+        book.setCategory(published.getCategory());
+        // book.setIsBestSeller();
+        
+
+        // book.setIsBestSeller(published.get);
         BookRegistered bookRegistered = new BookRegistered(book);
         bookRegistered.publishAfterCommit();
-        */
+     
 
         /** Example 2:  finding and process
         

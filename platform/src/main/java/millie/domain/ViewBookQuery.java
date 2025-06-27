@@ -9,8 +9,9 @@ public class ViewBookQuery {
     private Long id;
     private String bookName;
     private String category;
+    private String summaryContent;
     private Boolean isBestSeller;
     private String authorName;
-    private Integer 조회수;
+    private Integer viewCount;
     private Integer point;
 }
