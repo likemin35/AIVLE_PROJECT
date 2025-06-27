@@ -6,6 +6,9 @@ import millie.domain.ManuscriptRepository;
 import millie.domain.RequestPublishCommand;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import millie.domain.RegisterManuscriptCommand;
+import millie.domain.AuthorId;
+import millie.domain.Status;
 
 @RestController
 @RequestMapping("/manuscripts")
@@ -19,6 +22,18 @@ public class WritingController {
         Manuscript manuscript = manuscriptRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("원고를 찾을 수 없습니다."));
         manuscript.requestPublish(cmd);
+        manuscriptRepository.save(manuscript);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping
+    public ResponseEntity<?> register(@RequestBody RegisterManuscriptCommand cmd) {
+        Manuscript manuscript = new Manuscript();
+        manuscript.setTitle(cmd.getTitle());
+        manuscript.setContent(cmd.getContent());
+        manuscript.setAuthorId(new AuthorId(cmd.getAuthorId()));
+        manuscript.setStatus(Status.WRITING); // 기본 상태 설정
+
         manuscriptRepository.save(manuscript);
         return ResponseEntity.ok().build();
     }
