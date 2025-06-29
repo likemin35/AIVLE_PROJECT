@@ -28,14 +28,19 @@ public class Point {
         return pointRepository;
     }
 
-    // ✅ 회원가입 시 포인트 지급 (ex: 100포인트)
+    // 회원가입 시 포인트 지급 (기본 1000포인트)
     public static void gainRegisterPoint(UserRegistered userRegistered) {
         Point point = new Point();
         point.setUserId(userRegistered.getId());
-        point.setSubscriptionId(null); // 가입 시 구독정보는 없음
+        point.setSubscriptionId(null);
         point.setIsSubscribe(false);
-        point.setPoint(100); // 기본 가입 포인트 예시
 
+        int basePoint = 1000;
+        if ("KT".equalsIgnoreCase(userRegistered.getTelco())) {
+            basePoint += 5000; // KT 고객은 5000포인트 추가
+        }
+
+        point.setPoint(basePoint);
         repository().save(point);
 
         RegisterPointGained event = new RegisterPointGained(point);
@@ -44,7 +49,8 @@ public class Point {
         event.publishAfterCommit();
     }
 
-    // ✅ 구독 시 포인트 차감 로직 (포인트 부족 시 OutOfPoint 이벤트)
+
+    // 구독 시 포인트 차감 로직 (포인트 부족 시 OutOfPoint 이벤트)
     public static void decreasePoint(SubscriptionApplied subscriptionApplied) {
         repository().findByUserIdAndSubscriptionId(subscriptionApplied.getUserId(), subscriptionApplied.getId())
             .ifPresent(point -> {
@@ -71,7 +77,7 @@ public class Point {
             });
     }
 
-    // ✅ 포인트 구매 처리 (Command 기반)
+    //  포인트 구매 처리 (Command 기반)
     public void buyPoint(int amount) {
         this.point += amount;
 
@@ -79,6 +85,15 @@ public class Point {
         event.setPoint(amount);
         event.setUserId(this.userId);
         event.publishAfterCommit();
+    }
+
+    //  포인트 차감 처리 (예: 결제, 상품 구매 시)
+    public void usePoint(int amount) {
+        if (this.point < amount) {
+            throw new RuntimeException("잔여 포인트가 부족합니다.");
+        }
+
+        this.point -= amount;
     }
 }
 //>>> DDD / Aggregate Root

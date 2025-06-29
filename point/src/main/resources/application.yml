@@ -1,19 +1,43 @@
 server:
-  port: 8080
+  port: 8084
+  error:
+    include-message: always  # 예외 메시지를 HTTP 응답에 포함
 
 spring:
   application:
     name: point
+
 ---
 
 spring:
   profiles: default
+
+  datasource:
+    url: jdbc:h2:mem:testdb  # 메모리 DB (또는 jdbc:h2:file:./data/pointdb 로 변경 가능)
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    initialization-mode: always
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
   jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    defer-datasource-initialization: true
     properties:
       hibernate:
-        show_sql: true
         format_sql: true
         implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
+        jdbc:
+          time_zone: Asia/Seoul
+
+  sql:
+    init:
+      mode: always
+
   cloud:
     stream:
       kafka:
@@ -30,14 +54,10 @@ spring:
       bindings:
         event-in:
           group: point
-#<<< EDA / Topic Name
           destination: millie
-#>>> EDA / Topic Name
           contentType: application/json
         event-out:
-#<<< EDA / Topic Name
           destination: millie
-#>>> EDA / Topic Name
           contentType: application/json
 
 logging:
@@ -45,20 +65,25 @@ logging:
     org.hibernate.type: trace
     org.springframework.cloud: debug
 
-
-server:
-  port: 8084
-
 ---
 
 spring:
   profiles: docker
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
   jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
     properties:
       hibernate:
-        show_sql: true
         format_sql: true
         implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
+
   cloud:
     stream:
       kafka:
@@ -80,5 +105,3 @@ spring:
         event-out:
           destination: millie
           contentType: application/json
-
-
