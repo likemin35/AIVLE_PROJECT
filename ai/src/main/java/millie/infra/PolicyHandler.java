@@ -20,6 +20,9 @@ public class PolicyHandler {
     @Autowired
     PublishingRepository publishingRepository;
 
+    @Autowired
+    PublishingService publishingService;
+
     @StreamListener(KafkaProcessor.INPUT)
     public void whatever(@Payload String eventString) {}
 
@@ -36,7 +39,7 @@ public class PolicyHandler {
         );
 
         // Sample Logic //
-        Publishing.publish(event);
+        publishingService.publish(event);
     }
 }
 //>>> Clean Arch / Inbound Adaptor
