@@ -8,7 +8,7 @@ public class GetPointQuery {
 
     private Long pointId;
     private Integer point;
-    private Boolean isSubscribe;
+    private Boolean isPurchase; // 구독권 구매 여부
     private Long userId;
-    private Long subscriptionId;
+    private Boolean isSubscription; // 책 구독 여부
 }

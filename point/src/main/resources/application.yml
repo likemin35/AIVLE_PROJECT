@@ -47,7 +47,7 @@ spring:
           contentType: application/json
       kafka:
         binder:
-          brokers: localhost:9092
+          brokers: localhost:9092  # ✅ 이게 Kafka 주소 설정임
 
 logging:
   level:

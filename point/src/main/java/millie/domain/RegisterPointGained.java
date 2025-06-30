@@ -12,9 +12,10 @@ import millie.infra.AbstractEvent;
 public class RegisterPointGained extends AbstractEvent {
 
     private Long pointId;
-    private Long subscriptionId;
+    private Long userId;
     private String point;
-    private String isSubscription;
+    private Boolean isPurchase;
+    private Boolean isSubscription;
 
     public RegisterPointGained(Point aggregate) {
         super(aggregate);

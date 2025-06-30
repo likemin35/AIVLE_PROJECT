@@ -12,8 +12,8 @@ public class SubscriptionApplied extends AbstractEvent {
     private Long pointId;
     private Object bookId;
     private Long userId;
-    private Long subscriptionId;
     private Boolean isSubscription;
+    private Boolean isPurchase;
     private Date startSubscription;
     private Date endSubscription;
     private String pdfPath;

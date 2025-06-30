@@ -6,12 +6,13 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface KafkaProcessor {
+
     String INPUT = "event-in";
     String OUTPUT = "event-out";
 
     @Input(INPUT)
-    SubscribableChannel inboundTopic();
+    SubscribableChannel inboundTopic();  // Kafka 메시지 수신
 
     @Output(OUTPUT)
-    MessageChannel outboundTopic();
+    MessageChannel outboundTopic();      // Kafka 메시지 발행
 }

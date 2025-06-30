@@ -13,7 +13,7 @@ public class PointDecreased extends AbstractEvent {
 
     private Integer point;
     private Long userId;
-    private Long subscriptionId;
+    private Boolean isSubscription;
 
     public PointDecreased(Point aggregate) {
         super(aggregate);

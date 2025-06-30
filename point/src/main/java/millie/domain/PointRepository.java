@@ -18,19 +18,18 @@ public interface PointRepository extends PagingAndSortingRepository<Point, Long>
         "from Point point " +
         "where (:pointId is null or point.pointId = :pointId) " +
         "and (:point is null or point.point = :point) " +
-        "and (point.isSubscribe = :isSubscribe) " +
+        "and (point.isPurchase = :isPurchase) " +
         "and (:userId is null or point.userId = :userId) " +
-        "and (:subscriptionId is null or point.subscriptionId = :subscriptionId)"
+        "and (:isSubscription is null or point.isSubscription = :isSubscription)"
     )
     List<Point> getPoint(
         @org.springframework.data.repository.query.Param("pointId") Long pointId,
         @org.springframework.data.repository.query.Param("point") Integer point,
-        @org.springframework.data.repository.query.Param("isSubscribe") Boolean isSubscribe,
+        @org.springframework.data.repository.query.Param("isPurchase") Boolean isPurchase,
         @org.springframework.data.repository.query.Param("userId") Long userId,
-        @org.springframework.data.repository.query.Param("subscriptionId") Long subscriptionId,
+        @org.springframework.data.repository.query.Param("isSubscription") Boolean isSubscription,
         Pageable pageable
     );
 
-    Optional<Point> findByUserIdAndSubscriptionId(Long userId, Long subscriptionId);
-    List<Point> findAllByUserIdAndSubscriptionId(Long userId, Long subscriptionId);
+    List<Point> findAllByUserIdAndIsSubscription(Long userId, Boolean isSubscription);
 }
