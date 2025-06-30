@@ -15,7 +15,7 @@ import millie.domain.SubscriptionFailed;
 @Entity
 @Table(name = "Subscription_table")
 @Data
-//<<< DDD / Aggregate Root
+// <<< DDD / Aggregate Root
 public class Subscription {
 
     @Id
@@ -38,53 +38,34 @@ public class Subscription {
 
     @PostPersist
     public void onPostPersist() {
-        SubscriptionApplied subscriptionApplied = new SubscriptionApplied(this);
-        subscriptionApplied.publishAfterCommit();
+        System.out.println("✅ Subscription persisted: ID = " + this.getId());
 
-        SubscriptionFailed subscriptionFailed = new SubscriptionFailed(this);
-        subscriptionFailed.publishAfterCommit();
+        SubscriptionApplied applied = new SubscriptionApplied(this);
+        applied.publishAfterCommit();
     }
 
     public static SubscriptionRepository repository() {
         SubscriptionRepository subscriptionRepository = SubscriberApplication.applicationContext.getBean(
-            SubscriptionRepository.class
-        );
+                SubscriptionRepository.class);
         return subscriptionRepository;
     }
 
-    //<<< Clean Arch / Port Method
+    // <<< Clean Arch / Port Method
     public static void failSubscription(OutOfPoint outOfPoint) {
-        //implement business logic here:
-
-        /** Example 1:  new item 
-        Subscription subscription = new Subscription();
-        repository().save(subscription);
-
-        SubscriptionFailed subscriptionFailed = new SubscriptionFailed(subscription);
-        subscriptionFailed.publishAfterCommit();
-        */
-
-        /** Example 2:  finding and process
-        
-        // if outOfPoint.userIdsubscriptionId exists, use it
-        
-        // ObjectMapper mapper = new ObjectMapper();
-        // Map<Long, Object> pointMap = mapper.convertValue(outOfPoint.getUserId(), Map.class);
-        // Map<Long, Object> pointMap = mapper.convertValue(outOfPoint.getSubscriptionId(), Map.class);
-
-        repository().findById(outOfPoint.get???()).ifPresent(subscription->{
-            
-            subscription // do something
+        if (outOfPoint.getUserId() == null)
+            return;
+        String userId = outOfPoint.getUserId().toString();
+        repository().findByUserId(userId).ifPresent(subscription -> {
+            subscription.setIsSubscription(false); // 구독 취소 처리
             repository().save(subscription);
 
             SubscriptionFailed subscriptionFailed = new SubscriptionFailed(subscription);
             subscriptionFailed.publishAfterCommit();
 
-         });
-        */
-
+            System.out.println("❌ Subscription failed due to out of point. userId = " + userId);
+        });
     }
-    //>>> Clean Arch / Port Method
+    // >>> Clean Arch / Port Method
 
 }
-//>>> DDD / Aggregate Root
+// >>> DDD / Aggregate Root
