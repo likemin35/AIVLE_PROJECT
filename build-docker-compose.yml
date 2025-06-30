@@ -23,15 +23,6 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
 
-  ai-service:
-    build: .
-    ports:
-      - 8087:8087
-    environment:
-      - OPENAI_API_KEY=sk-
-    depends_on:
-      - kafka
-      
   author:
     depends_on: 
       - kafka
@@ -108,6 +99,7 @@ services:
     image: adoptopenjdk/maven-openjdk11:latest
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - OPENAI_API_KEY=sk-
     command: mvn spring-boot:run
     ports:
       - 8087:8087
