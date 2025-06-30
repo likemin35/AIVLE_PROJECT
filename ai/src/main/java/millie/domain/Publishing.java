@@ -49,11 +49,30 @@ public class Publishing {
             publishing.setWebUrl(event.getWebUrl() != null ? event.getWebUrl() : "https://millie.co.kr");
 
             // 2. 책 내용 요약
-            String summary = aiClient.summarizeContent(event.getContent());
+            String summary = aiClient.summarizeContent(
+                event.getTitle(),
+                event.getAuthorId().toString(),
+                String.valueOf(event.getId()),
+                publishing.getManuscriptId() != null ? publishing.getManuscriptId().getId() : "",
+                publishing.getCost() != null ? publishing.getCost().toString() : "",
+                event.getCategory(),
+                event.getWebUrl(),
+                event.getContent()
+            );
+
             publishing.setSummaryContent(summary);
 
             // 3. 표지 이미지 생성
-            String imageUrl = aiClient.generateCover(summary, event.getTitle(), publishing.getCategory());
+            String imageUrl = aiClient.generateCover(
+                event.getTitle(),
+                event.getAuthorId().toString(),
+                publishing.getManuscriptId() != null ? publishing.getManuscriptId().getId() : "",
+                String.valueOf(event.getId()),
+                event.getCategory(),
+                publishing.getCost() != null ? publishing.getCost().toString() : "",
+                event.getWebUrl(),
+                summary
+            );
             publishing.setImage(imageUrl);
 
             // 4. 연속형 가격 예측 (AI 기반, 1000 ~ 10000)
