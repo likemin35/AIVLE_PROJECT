@@ -11,7 +11,7 @@ import millie.infra.AbstractEvent;
 @ToString
 public class OutOfPoint extends AbstractEvent {
 
-    private Long id;
+    private Long pointId;
     private Integer point;
     private Long userId;
     private Long subscriptionId;

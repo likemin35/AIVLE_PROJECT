@@ -1,25 +1,22 @@
-package millie.infra;
-
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import millie.domain.UserRegistered;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping("/test")
 public class KafkaTestController {
 
-    @Autowired
-    private KafkaTemplate<String, Object> kafkaTemplate;
-
     @PostMapping("/register")
-    public String sendTestUserRegistered() {
+    public String sendTestEvent() {
         UserRegistered event = new UserRegistered();
-        event.setId(1L);  // test userId
-        event.setName("홍길동");
-        event.setTelecom("KT"); // KT면 5000포인트 로직 확인 가능
+        //event.setPointId(999L);
+        event.setUserName("테스터");
+        event.setTelecom("KT");
 
-        kafkaTemplate.send("millie", event);
-        return "UserRegistered 이벤트 전송됨";
+        event.publish(); //  AbstractEvent에서 제공하는 메서드
+
+        return "✅ Kafka 이벤트 전송 완료 (AbstractEvent 사용)";
     }
 }

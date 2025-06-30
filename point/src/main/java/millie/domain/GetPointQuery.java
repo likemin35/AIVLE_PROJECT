@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class GetPointQuery {
 
-    private Long id;
+    private Long pointId;
     private Integer point;
     private Boolean isSubscribe;
     private Long userId;

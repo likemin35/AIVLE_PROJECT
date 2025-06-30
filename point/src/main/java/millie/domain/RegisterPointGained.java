@@ -11,7 +11,7 @@ import millie.infra.AbstractEvent;
 @ToString
 public class RegisterPointGained extends AbstractEvent {
 
-    private Long id;
+    private Long pointId;
     private Long subscriptionId;
     private String point;
     private String isSubscription;

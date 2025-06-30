@@ -11,23 +11,26 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 //<<< PoEAA / Repository
 @RepositoryRestResource(collectionResourceRel = "points", path = "points")
-public interface PointRepository
-    extends PagingAndSortingRepository<Point, Long> {
+public interface PointRepository extends PagingAndSortingRepository<Point, Long> {
+
     @Query(
         value = "select point " +
         "from Point point " +
-        "where(:id is null or point.id = :id) and (:point is null or point.point = :point) and (point.isSubscribe = :isSubscribe) and (:userId is null or point.userId = :userId) and (:subscriptionId is null or point.subscriptionId = :subscriptionId)"
+        "where (:pointId is null or point.pointId = :pointId) " +
+        "and (:point is null or point.point = :point) " +
+        "and (point.isSubscribe = :isSubscribe) " +
+        "and (:userId is null or point.userId = :userId) " +
+        "and (:subscriptionId is null or point.subscriptionId = :subscriptionId)"
     )
     List<Point> getPoint(
-        Long id,
-        Integer point,
-        Boolean isSubscribe,
-        Long userId,
-        Long subscriptionId,
+        @org.springframework.data.repository.query.Param("pointId") Long pointId,
+        @org.springframework.data.repository.query.Param("point") Integer point,
+        @org.springframework.data.repository.query.Param("isSubscribe") Boolean isSubscribe,
+        @org.springframework.data.repository.query.Param("userId") Long userId,
+        @org.springframework.data.repository.query.Param("subscriptionId") Long subscriptionId,
         Pageable pageable
     );
 
     Optional<Point> findByUserIdAndSubscriptionId(Long userId, Long subscriptionId);
+    List<Point> findAllByUserIdAndSubscriptionId(Long userId, Long subscriptionId);
 }
-
-
