@@ -5,6 +5,8 @@ import lombok.*;
 
 @Embeddable
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class BookId {
     private Long id;
 }

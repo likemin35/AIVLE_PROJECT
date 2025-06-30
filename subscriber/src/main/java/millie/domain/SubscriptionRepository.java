@@ -37,6 +37,6 @@ public interface SubscriptionRepository
         Pageable pageable
         
     );
-    Optional<Subscription> findByUserId(String userId);
+    Optional<Subscription> findByUserId(UserId userId);
 
 }

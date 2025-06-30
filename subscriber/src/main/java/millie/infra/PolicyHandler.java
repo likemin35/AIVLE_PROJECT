@@ -1,9 +1,11 @@
 package millie.infra;
 
+import java.util.Date;
+import java.util.Calendar;
+import java.util.Map;
 import java.util.Optional;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javax.naming.NameParser;
 import javax.naming.NameParser;
 import javax.transaction.Transactional;
 import millie.config.kafka.KafkaProcessor;
@@ -25,52 +27,109 @@ public class PolicyHandler {
     SubscriptionRepository subscriptionRepository;
 
     @StreamListener(KafkaProcessor.INPUT)
-    public void whatever(@Payload String eventString) {
-    }
+    public void handleKafkaEvents(@Payload String eventString) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    @StreamListener(value = KafkaProcessor.INPUT, condition = "headers['type']=='OutOfPoint'")
-    public void wheneverOutOfPoint_FailSubscription(
-            @Payload OutOfPoint outOfPoint) {
-        OutOfPoint event = outOfPoint;
-        System.out.println(
-                "\n\n##### listener FailSubscription : " + outOfPoint + "\n\n");
+            Map<String, Object> event = mapper.readValue(eventString, Map.class);
 
-        Subscription.failSubscription(event);
-    }
+            String eventType = (String) event.get("eventType");
+            if (eventType == null) {
+                System.out.println(">>> [경고] eventType 누락됨. 메시지 무시됨: " + eventString);
+                return;
+            }
 
-    @StreamListener(value = KafkaProcessor.INPUT, condition = "headers['type']=='SubscriptionFailed'")
-    public void wheneverSubscriptionFailed_GuideFeeConversionSuggestion(
-            @Payload SubscriptionFailed subscriptionFailed) {
-        SubscriptionFailed event = subscriptionFailed;
-        System.out.println(
-                "\n\n##### listener GuideFeeConversionSuggestion : " +
-                        subscriptionFailed +
-                        "\n\n");
+            switch (eventType) {
 
-        User.guideFeeConversionSuggestion(event);
+                case "PointDecreased":
+                    Long userId = Long.valueOf(event.get("userId").toString());
+                    Long bookId = Long.valueOf(event.get("bookId").toString());
 
-        // BuySubscriptionCommand command = new BuySubscriptionCommand();
-        // command.setUserId(subscriptionFailed.getUserId());
-        // User.buySubscription(command);
-    }
+                    System.out.println(">>> [구독 성공] PointDecreased 수신: userId = " + userId + ", bookId = " + bookId);
 
-    @StreamListener(value = KafkaProcessor.INPUT, condition = "headers['type']=='SubscriptionCanceled'")
-    public void wheneverSubscriptionCanceled_CancelSubscription(@Payload SubscriptionCanceled subscriptionCanceled) {
-        if (!subscriptionCanceled.validate())
-            return;
+                    Subscription subscription = new Subscription();
+                    subscription.setUserId(new UserId(userId));
+                    subscription.setBookId(new BookId(bookId));
+                    subscription.setIsSubscription(true);
 
-        System.out.println("\n##### listener CancelSubscription : " + subscriptionCanceled.toJson());
+                    // 대여 기간 설정
+                    Date rentalStart = new Date();
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(rentalStart);
+                    cal.add(Calendar.DAY_OF_MONTH, 30);
+                    Date rentalEnd = cal.getTime();
 
-        Optional<Subscription> subscriptionOptional = subscriptionRepository
-                .findByUserId(subscriptionCanceled.getUserId());
+                    subscription.setRentalstart(rentalStart);
+                    subscription.setRentalend(rentalEnd);
 
-        if (subscriptionOptional.isPresent()) {
-            Subscription subscription = subscriptionOptional.get();
-            subscription.setIsSubscription(false); // 구독 상태 해제
-            subscriptionRepository.save(subscription);
-            System.out.println(">>> 구독 상태 취소 완료: userId = " + subscriptionCanceled.getUserId());
-        } else {
-            System.out.println(">>> 해당 userId에 대한 구독 정보가 없습니다: " + subscriptionCanceled.getUserId());
+                    String webUrl = "https://cdn.millie.com/book/pdf/" + bookId + ".pdf";
+                    subscription.setWebUrl(webUrl);
+
+                    Subscription.repository().save(subscription);
+                    SubscriptionApplied applied = new SubscriptionApplied(subscription);
+                    applied.publishAfterCommit();
+                    break;
+
+                case "OutOfPoint":
+                    System.out.println(">>> [수신] OutOfPoint 이벤트");
+
+                    OutOfPoint outOfPoint = mapper.convertValue(event, OutOfPoint.class);
+                    Subscription.failSubscription(outOfPoint);
+                    break;
+
+                case "SubscriptionFailed":
+                    System.out.println(">>> [수신] SubscriptionFailed 이벤트");
+
+                    SubscriptionFailed subscriptionFailed = mapper.convertValue(event, SubscriptionFailed.class);
+                    User.guideFeeConversionSuggestion(subscriptionFailed);
+                    break;
+
+                case "SubscriptionCanceled":
+                    System.out.println(">>> [수신] SubscriptionCanceled 이벤트");
+
+                    SubscriptionCanceled canceled = mapper.convertValue(event, SubscriptionCanceled.class);
+                    if (!canceled.validate())
+                        return;
+
+                    UserId uid = new UserId(Long.valueOf(canceled.getUserId()));
+                    Optional<Subscription> subscriptionOptional = subscriptionRepository.findByUserId(uid);
+
+                    if (subscriptionOptional.isPresent()) {
+                        Subscription s = subscriptionOptional.get();
+                        s.setIsSubscription(false);
+                        subscriptionRepository.save(s);
+                        System.out.println(">>> 구독 상태 취소 완료: userId = " + canceled.getUserId());
+                    } else {
+                        System.out.println(">>> 해당 userId에 대한 구독 정보 없음: " + canceled.getUserId());
+                    }
+                    break;
+
+                case "SubscriptionBought":
+                    System.out.println(">>> [수신] SubscriptionBought 이벤트");
+
+                    SubscriptionBought bought = mapper.convertValue(event, SubscriptionBought.class);
+                    if (!bought.validate())
+                        return;
+
+                    UserId userIdObj = bought.getUserId();
+                    if (userIdObj == null || userIdObj.getId() == null)
+                        return;
+
+                    userRepository.findById(userIdObj.getId()).ifPresent(user -> {
+                        user.setIsPurchase(true);
+                        userRepository.save(user);
+                        System.out.println(">>> 구독권 구매 상태 반영 완료: userId = " + user.getId());
+                    });
+                    break;
+
+                default:
+                    System.out.println(">>> [무시됨] 알 수 없는 이벤트 타입: " + eventType);
+            }
+
+        } catch (Exception e) {
+            System.out.println(">>> Kafka 이벤트 파싱 실패:");
+            e.printStackTrace();
         }
     }
 }

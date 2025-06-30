@@ -21,14 +21,13 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
     private String email;
-
     private String userName;
-
+    private String phoneNumber;
     private Boolean isPurchase;
-
     private String message;
+    @Embedded
+    private UserId userId;
 
     @PostPersist
     public void onPostPersist() {
