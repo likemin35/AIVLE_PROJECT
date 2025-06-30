@@ -7,8 +7,6 @@ import javax.transaction.Transactional;
 import millie.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 //<<< Clean Arch / Inbound Adaptor
 
@@ -27,7 +25,6 @@ public class AuthorController {
     )
     public Author approveAuthor(
         @PathVariable(value = "id") Long id,
-        @RequestBody ApproveAuthorCommand approveAuthorCommand,
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
@@ -36,8 +33,10 @@ public class AuthorController {
 
         optionalAuthor.orElseThrow(() -> new Exception("No Entity Found"));
         Author author = optionalAuthor.get();
-        author.approveAuthor(approveAuthorCommand);
+        ApproveAuthorCommand cmd = new ApproveAuthorCommand();
+        cmd.setIsApprove(true);
 
+        author.approveAuthor(cmd);
         authorRepository.save(author);
         return author;
     }
@@ -49,7 +48,6 @@ public class AuthorController {
     )
     public Author disapproveAuthor(
         @PathVariable(value = "id") Long id,
-        @RequestBody DisapproveAuthorCommand disapproveAuthorCommand,
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
@@ -58,8 +56,10 @@ public class AuthorController {
 
         optionalAuthor.orElseThrow(() -> new Exception("No Entity Found"));
         Author author = optionalAuthor.get();
-        author.disapproveAuthor(disapproveAuthorCommand);
+        DisapproveAuthorCommand cmd = new DisapproveAuthorCommand();
+        cmd.setIsApprove(false);
 
+        author.disapproveAuthor(cmd);
         authorRepository.save(author);
         return author;
     }

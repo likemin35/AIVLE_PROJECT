@@ -10,4 +10,6 @@ import lombok.Data;
 public class ApproveAuthorCommand {
 
     private Boolean isApprove;
+    public void setIsApprove(boolean isApprove) { this.isApprove = isApprove; }
+    public boolean getIsApprove() { return isApprove; }
 }

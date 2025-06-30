@@ -70,6 +70,7 @@ public class Author  {
         repository().findById(this.getId()).ifPresent(author->{
             //작가에 대한 승인 요청이 false 경우 비승인처리 및 이벤트 발행
             if(disapproveAuthorCommand.getIsApprove() == false){
+            this.setIsApprove(disapproveAuthorCommand.getIsApprove());
             AuthorDisApproved authorDisApproved = new AuthorDisApproved(this);
             authorDisApproved.publishAfterCommit();
             }
