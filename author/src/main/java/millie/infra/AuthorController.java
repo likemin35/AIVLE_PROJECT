@@ -19,17 +19,17 @@ public class AuthorController {
     AuthorRepository authorRepository;
 
     @RequestMapping(
-        value = "/authors/{id}/approveauthor",
+        value = "/authors/{authorId}/approveauthor",
         method = RequestMethod.PATCH,
         produces = "application/json;charset=UTF-8"
     )
     public Author approveAuthor(
-        @PathVariable(value = "id") Long id,
+        @PathVariable(value = "authorId") Long authorId,
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
         System.out.println("##### /author/approveAuthor  called #####");
-        Optional<Author> optionalAuthor = authorRepository.findById(id);
+        Optional<Author> optionalAuthor = authorRepository.findById(authorId);
 
         optionalAuthor.orElseThrow(() -> new Exception("No Entity Found"));
         Author author = optionalAuthor.get();
@@ -42,17 +42,17 @@ public class AuthorController {
     }
 
     @RequestMapping(
-        value = "/authors/{id}/disapproveauthor",
+        value = "/authors/{authorId}/disapproveauthor",
         method = RequestMethod.PATCH,
         produces = "application/json;charset=UTF-8"
     )
     public Author disapproveAuthor(
-        @PathVariable(value = "id") Long id,
+        @PathVariable(value = "authorId") Long authorId,
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
         System.out.println("##### /author/disapproveAuthor  called #####");
-        Optional<Author> optionalAuthor = authorRepository.findById(id);
+        Optional<Author> optionalAuthor = authorRepository.findById(authorId);
 
         optionalAuthor.orElseThrow(() -> new Exception("No Entity Found"));
         Author author = optionalAuthor.get();

@@ -21,7 +21,7 @@ public class Author  {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long id;    
+    private Long authorId;    
     
     private String email;    
     
@@ -54,7 +54,7 @@ public class Author  {
         
         //implement business logic here:
         //작가정보를 조회
-        repository().findById(this.getId()).ifPresent(author->{
+        repository().findById(this.getAuthorId()).ifPresent(author->{
             //작가에 대한 승인 요청이 true일 경우 승인처리 및 이벤트 발행
             if(approveAuthorCommand.getIsApprove() == true){
                 this.setIsApprove(approveAuthorCommand.getIsApprove());
@@ -67,7 +67,7 @@ public class Author  {
 //<<< Clean Arch / Port Method
     public void disapproveAuthor(DisapproveAuthorCommand disapproveAuthorCommand){
         //작가정보를 조회
-        repository().findById(this.getId()).ifPresent(author->{
+        repository().findById(this.getAuthorId()).ifPresent(author->{
             //작가에 대한 승인 요청이 false 경우 비승인처리 및 이벤트 발행
             if(disapproveAuthorCommand.getIsApprove() == false){
             this.setIsApprove(disapproveAuthorCommand.getIsApprove());
