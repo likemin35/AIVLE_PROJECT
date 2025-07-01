@@ -11,10 +11,10 @@ import millie.infra.AbstractEvent;
 @ToString
 public class OutOfPoint extends AbstractEvent {
 
-    private Long id;
+    private Long pointId;
     private Integer point;
-    private UserId userId;
-    private SubscriptionId subscriptionId;
+    private Long userId;
+    private Boolean isSubscription;
 
     public OutOfPoint(Point aggregate) {
         super(aggregate);

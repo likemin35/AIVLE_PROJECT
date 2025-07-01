@@ -12,6 +12,8 @@ import millie.WritingApplication;
 import millie.domain.ManuscriptEdited;
 import millie.domain.ManuscriptRegistered;
 
+
+
 @Entity
 @Table(name = "Manuscript_table")
 @Data
@@ -20,7 +22,7 @@ public class Manuscript {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private Long bookId;
 
     private String title;
 
@@ -54,10 +56,17 @@ public class Manuscript {
 
     //<<< Clean Arch / Port Method
     public void requestPublish(RequestPublishCommand requestPublishCommand) {
-        //implement business logic here:
-
-        PublishingRequested publishingRequested = new PublishingRequested(this);
-        publishingRequested.publishAfterCommit();
+        System.out.println("📌 Request status: " + requestPublishCommand.getStatus());
+    
+        try {
+            Status newStatus = Status.valueOf(requestPublishCommand.getStatus().toUpperCase()); // ✅ 소문자 대응
+            this.status = newStatus;
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("유효하지 않은 상태값입니다: " + requestPublishCommand.getStatus()); // ✅ 에러 메시지 명확
+        }
+    
+        PublishingRequested event = new PublishingRequested(this);
+        event.publishAfterCommit();
     }
     //>>> Clean Arch / Port Method
 

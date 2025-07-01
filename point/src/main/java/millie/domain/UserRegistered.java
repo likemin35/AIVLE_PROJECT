@@ -9,7 +9,8 @@ import millie.infra.AbstractEvent;
 @ToString
 public class UserRegistered extends AbstractEvent {
 
-    private Long id;
+    private Long userId;
     private String email;
     private String userName;
+    private String telecom;
 }

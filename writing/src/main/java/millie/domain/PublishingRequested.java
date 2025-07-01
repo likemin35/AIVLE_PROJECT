@@ -11,7 +11,7 @@ import millie.infra.AbstractEvent;
 @ToString
 public class PublishingRequested extends AbstractEvent {
 
-    private Long id;
+    private Long bookId;
     private String title;
     private AuthorId authorId;
     private Status status;
@@ -19,6 +19,12 @@ public class PublishingRequested extends AbstractEvent {
 
     public PublishingRequested(Manuscript aggregate) {
         super(aggregate);
+        this.bookId = aggregate.getBookId();
+        this.title = aggregate.getTitle();
+        this.authorId = aggregate.getAuthorId();
+        this.status = aggregate.getStatus();
+        this.content = aggregate.getContent();
+        
     }
 
     public PublishingRequested() {

@@ -7,5 +7,7 @@ import lombok.Data;
 @Data
 public class RequestPublishCommand {
 
-    private Status status;
+    private String status;
+
+    public RequestPublishCommand() {}
 }

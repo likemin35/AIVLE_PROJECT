@@ -21,37 +21,25 @@ public class Author  {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
+    private Long authorId;    
     
+    private String email;    
     
+    private String authorName;    
     
-private Long id;    
+    private String introduction;    
     
-    
-private String email;    
-    
-    
-private String authorName;    
-    
-    
-private String introduction;    
-    
-    
-private String feturedWorks;    
+    private String feturedWorks;    
     
     @ElementCollection
-private List<Portfolio> portfolios;    
+    private List<Portfolio> portfolios;    
     
-    
-private Boolean isApprove;
+    private Boolean isApprove;
 
     @PostPersist
     public void onPostPersist(){
-
-
         AuthorRegistered authorRegistered = new AuthorRegistered(this);
         authorRegistered.publishAfterCommit();
-
-    
     }
 
     public static AuthorRepository repository(){
@@ -65,27 +53,28 @@ private Boolean isApprove;
     public void approveAuthor(ApproveAuthorCommand approveAuthorCommand){
         
         //implement business logic here:
-        
-
-
-        AuthorApproved authorApproved = new AuthorApproved(this);
-        authorApproved.publishAfterCommit();
+        //작가정보를 조회
+        repository().findById(this.getAuthorId()).ifPresent(author->{
+            //작가에 대한 승인 요청이 true일 경우 승인처리 및 이벤트 발행
+            if(approveAuthorCommand.getIsApprove() == true){
+                this.setIsApprove(approveAuthorCommand.getIsApprove());
+                AuthorApproved authorApproved = new AuthorApproved(this);
+                authorApproved.publishAfterCommit();
+            }
+        });
     }
 //>>> Clean Arch / Port Method
 //<<< Clean Arch / Port Method
     public void disapproveAuthor(DisapproveAuthorCommand disapproveAuthorCommand){
-        
-        //implement business logic here:
-        
-
-        millie.external.AuthorQuery authorQuery = new millie.external.AuthorQuery();
-        // authorQuery.set??()        
-          = AuthorApplication.applicationContext
-            .getBean(millie.external.Service.class)
-            .author(authorQuery);
-
-        AuthorDisApproved authorDisApproved = new AuthorDisApproved(this);
-        authorDisApproved.publishAfterCommit();
+        //작가정보를 조회
+        repository().findById(this.getAuthorId()).ifPresent(author->{
+            //작가에 대한 승인 요청이 false 경우 비승인처리 및 이벤트 발행
+            if(disapproveAuthorCommand.getIsApprove() == false){
+            this.setIsApprove(disapproveAuthorCommand.getIsApprove());
+            AuthorDisApproved authorDisApproved = new AuthorDisApproved(this);
+            authorDisApproved.publishAfterCommit();
+            }
+        });
     }
 //>>> Clean Arch / Port Method
 

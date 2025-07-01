@@ -11,10 +11,11 @@ import millie.infra.AbstractEvent;
 @ToString
 public class RegisterPointGained extends AbstractEvent {
 
-    private Long id;
-    private String 구독자정보;
-    private String 포인트;
-    private String 구독권여부;
+    private Long pointId;
+    private Long userId;
+    private String point;
+    private Boolean isPurchase;
+    private Boolean isSubscription;
 
     public RegisterPointGained(Point aggregate) {
         super(aggregate);
