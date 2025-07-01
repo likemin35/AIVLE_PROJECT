@@ -38,5 +38,7 @@ public interface SubscriptionRepository
         
     );
     Optional<Subscription> findByUserId(UserId userId);
+    List<Subscription> findByUserIdAndIsSubscription(UserId userId, Boolean isSubscription);
+
 
 }

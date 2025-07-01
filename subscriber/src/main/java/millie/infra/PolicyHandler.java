@@ -105,6 +105,24 @@ public class PolicyHandler {
                     }
                     break;
 
+                case "UserRegistered":
+                    System.out.println(">>> [수신] UserRegistered 이벤트");
+
+                    UserRegistered userRegistered = mapper.convertValue(event, UserRegistered.class);
+                    if (!userRegistered.validate())
+                        return;
+
+                    User user = new User();
+                    user.setId(userRegistered.getId());
+                    user.setEmail(userRegistered.getEmail());
+                    user.setUserName(userRegistered.getUserName());
+                    user.setPhoneNumber(userRegistered.getPhoneNumber());
+                    user.setIsPurchase(false); // 초기값
+
+                    userRepository.save(user);
+                    System.out.println(">>> 유저 등록 완료: userId = " + user.getId());
+                    break;
+
                 case "SubscriptionBought":
                     System.out.println(">>> [수신] SubscriptionBought 이벤트");
 
@@ -116,10 +134,10 @@ public class PolicyHandler {
                     if (userIdObj == null || userIdObj.getId() == null)
                         return;
 
-                    userRepository.findById(userIdObj.getId()).ifPresent(user -> {
-                        user.setIsPurchase(true);
-                        userRepository.save(user);
-                        System.out.println(">>> 구독권 구매 상태 반영 완료: userId = " + user.getId());
+                    userRepository.findById(userIdObj.getId()).ifPresent(founduser -> {
+                        founduser.setIsPurchase(true);
+                        userRepository.save(founduser);
+                        System.out.println(">>> 구독권 구매 상태 반영 완료: userId = " + founduser.getId());
                     });
                     break;
 

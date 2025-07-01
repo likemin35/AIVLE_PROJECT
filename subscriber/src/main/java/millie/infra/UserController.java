@@ -1,14 +1,15 @@
 package millie.infra;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import millie.dto.GetSubscription;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import millie.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 //<<< Clean Arch / Inbound Adaptor
 
@@ -52,6 +53,29 @@ public class UserController {
 
         userRepository.save(user);
         return user;
+    }
+
+    @Autowired
+    SubscriptionRepository subscriptionRepository;
+
+    @GetMapping("/userId/{userId}")
+    public List<GetSubscription> getActiveSubscriptionsByUserId(@PathVariable Long userId) {
+        System.out.println("📘 사용자 " + userId + "의 현재 구독 중인 책 목록 조회");
+
+        UserId embeddedUserId = new UserId(userId);
+        List<Subscription> subscriptions = subscriptionRepository.findByUserIdAndIsSubscription(embeddedUserId, true);
+
+        return subscriptions.stream().map(subscription -> {
+            GetSubscription dto = new GetSubscription();
+            dto.setId(subscription.getId());
+            dto.setUserId(subscription.getUserId().getId());
+            dto.setBookId(subscription.getBookId().getId());
+            dto.setIsSubscription(subscription.getIsSubscription());
+            dto.setRentalStart(subscription.getRentalstart());
+            dto.setRentalEnd(subscription.getRentalend());
+            dto.setWebUrl(subscription.getWebUrl());
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     @RequestMapping(value = "/users", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
