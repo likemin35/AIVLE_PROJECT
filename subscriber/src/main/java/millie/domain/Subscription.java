@@ -25,6 +25,9 @@ public class Subscription {
     private Date rentalstart;
     private Date rentalend;
     private String webUrl;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_ref_id")
+    private User user;
     @Embedded
     @AttributeOverride(name = "id", column = @Column(name = "book_id_id"))
     private BookId bookId;
@@ -47,20 +50,19 @@ public class Subscription {
 
     // <<< Clean Arch / Port Method
     public static void failSubscription(OutOfPoint outOfPoint) {
-        if (outOfPoint.getUserId() == null)
+        if (outOfPoint.getUserId() == null || outOfPoint.getBookId() == null)
             return;
 
-        UserId embeddedUserId = new UserId(outOfPoint.getUserId());
+        SubscriptionFailed subscriptionFailed = new SubscriptionFailed();
+        subscriptionFailed.setUserId(outOfPoint.getUserId());
+        subscriptionFailed.setBookId(outOfPoint.getBookId());
+        subscriptionFailed.setIsSubscription(false);
+        subscriptionFailed.setMessage("포인트 부족으로 대여 실패");
 
-        repository().findByUserId(embeddedUserId).ifPresent(subscription -> {
-            subscription.setIsSubscription(false); // 구독 취소 처리
-            repository().save(subscription);
+        subscriptionFailed.publishAfterCommit();
 
-            SubscriptionFailed subscriptionFailed = new SubscriptionFailed(subscription);
-            subscriptionFailed.publishAfterCommit();
-
-            System.out.println("Subscription failed due to out of point. userId = " + embeddedUserId.getId());
-        });
+        System.out.println(">>> [이벤트 발행] SubscriptionFailed: userId = "
+                + outOfPoint.getUserId() + ", bookId = " + outOfPoint.getBookId());
     }
     // >>> Clean Arch / Port Method
 

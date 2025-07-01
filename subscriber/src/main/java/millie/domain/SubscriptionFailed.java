@@ -14,6 +14,7 @@ public class SubscriptionFailed extends AbstractEvent {
     private Boolean isSubscription;
     private Date startSubscription;
     private Date endSubscription;
+    private String message;
 
     public SubscriptionFailed(Subscription aggregate) {
         super(aggregate);

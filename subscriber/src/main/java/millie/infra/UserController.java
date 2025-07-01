@@ -3,6 +3,8 @@ package millie.infra;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import millie.dto.GetSubscription;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,6 +22,13 @@ public class UserController {
 
     @Autowired
     UserRepository userRepository;
+
+    @GetMapping("/users")
+    public List<User> getAllUsers() {
+        Iterable<User> iterable = userRepository.findAll();
+        return StreamSupport.stream(iterable.spliterator(), false)
+                .collect(Collectors.toList());
+    }
 
     @RequestMapping(value = "/users/{id}/buysubscription", method = RequestMethod.PUT, produces = "application/json;charset=UTF-8")
     public User buySubscription(

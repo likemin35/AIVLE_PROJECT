@@ -15,6 +15,7 @@ import millie.domain.BuySubscriptionCommand;
 @Entity
 @Table(name = "User_table")
 @Data
+
 // <<< DDD / Aggregate Root
 public class User {
 
@@ -28,6 +29,9 @@ public class User {
     private String message;
     @Embedded
     private UserId userId;
+    private Boolean isKt;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Subscription> subscriptions;
 
     @PostPersist
     public void onPostPersist() {
