@@ -2,7 +2,7 @@ package millie.domain;
 
 import javax.persistence.Embeddable;
 import java.io.Serializable;
-import java.util.Objects; 
+import java.util.Objects;
 
 @Embeddable
 public class AuthorId implements Serializable {
@@ -38,11 +38,11 @@ public class AuthorId implements Serializable {
         if (this == o) return true;
         if (!(o instanceof AuthorId)) return false;
         AuthorId authorId = (AuthorId) o;
-        return Objects.equals(id, authorId.id);
+        return isApprove == authorId.isApprove && Objects.equals(id, authorId.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, isApprove);
     }
 }
