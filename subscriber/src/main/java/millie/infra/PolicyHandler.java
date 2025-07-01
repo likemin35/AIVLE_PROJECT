@@ -174,6 +174,7 @@ public class PolicyHandler {
                             ">>> 사용자 등록 완료: userId = " + savedUser.getId() + ", userName = " + savedUser.getUserName());
                     break;
                 }
+
                 case "SubscriptionBought": {
                     System.out.println(">>> [수신] SubscriptionBought 이벤트");
                     SubscriptionBought bought = mapper.convertValue(event, SubscriptionBought.class);
@@ -189,6 +190,7 @@ public class PolicyHandler {
                         userRepository.save(founduser);
                         System.out.println(">>> 구독권 구매 상태 반영 완료: userId = " + founduser.getId());
                     });
+
                     break;
                 }
 
@@ -197,7 +199,7 @@ public class PolicyHandler {
             }
 
         } catch (Exception e) {
-            System.out.println(">>> Kafka 이벤트 파싱 실패:");
+            System.err.println(">>> [오류] 이벤트 처리 중 오류 발생: " + e.getMessage());
             e.printStackTrace();
         }
     }
