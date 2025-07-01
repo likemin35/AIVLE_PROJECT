@@ -25,31 +25,37 @@ public class PlatformApplication {
         applicationContext =
             SpringApplication.run(PlatformApplication.class, args);
             
+        
         System.out.println(">>> Local Kafka Event Publishing Test Started <<<");
         try {
-            // --- 기존 BookRegistered 이벤트 발행 코드 (주석 처리 또는 제거) ---
-            // BookRegistered publishedEvent = new BookRegistered();
-            // publishedEvent.setId(2L);
-            // publishedEvent.setBookName("Test Book Title");
-            // // publishedEvent.setAuthorId(123123);
+            // --- BookRegistered 이벤트 발행 코드 ---
+            BookRegistered bookRegisteredEvent = new BookRegistered();
+            bookRegisteredEvent.setId(2L);
+            bookRegisteredEvent.setBookName("Test Book Title (BookRegistered)2");
+            bookRegisteredEvent.setCategory("테스트 카테고리2");
+            bookRegisteredEvent.setIsBestSeller(false);
+            bookRegisteredEvent.setSummaryContent("안녕2");
+            // 필요한 다른 필드 설정
 
-            // ((ApplicationEventPublisher) applicationContext).publishEvent(publishedEvent);
+            bookRegisteredEvent.publish(); // <-- AbstractEvent의 publish() 호출
 
-            // System.out.println(">>> BookRegistered event prepared and published: "
-            //                     + "ID: " + publishedEvent.getId() + " <<<");
-            // -----------------------------------------------------------
+            System.out.println(">>> BookRegistered event prepared and published: "
+                                + "ID: " + bookRegisteredEvent.getId()
+                                + ", BookName: " + bookRegisteredEvent.getBookName() + " <<<");
 
+            System.out.println("--- Waiting a moment before next event ---");
+            Thread.sleep(500); // 두 이벤트가 너무 가깝게 발행되는 것을 피하기 위해 잠시 대기
 
             // --- 새로운 BadgeGranted 이벤트 발행 코드 ---
             BadgeGranted badgeGrantedEvent = new BadgeGranted();
             badgeGrantedEvent.setId(101L); // 예시 ID
-            badgeGrantedEvent.setBookName("테스트 도서명"); // 예시 도서명
+            badgeGrantedEvent.setBookName("테스트 도서명2"); // 예시 도서명
+            badgeGrantedEvent.setCategory("테스트 카테고리2");
             badgeGrantedEvent.setIsBestSeller(true); // 예시 베스트셀러 여부
             badgeGrantedEvent.setSubscriptionCount(5000); // 예시 구독자 수
             badgeGrantedEvent.setViews(20); // 예시 조회수
 
-            ((ApplicationEventPublisher) applicationContext).publishEvent(badgeGrantedEvent);
-
+            badgeGrantedEvent.publish();
             System.out.println(">>> BadgeGranted event prepared and published: "
                                 + "ID: " + badgeGrantedEvent.getId()
                                 + ", BookName: " + badgeGrantedEvent.getBookName()
@@ -65,8 +71,4 @@ public class PlatformApplication {
         System.out.println(">>> Local Kafka Event Publishing Test Finished <<<");
     }
 
-
-
-
-    
 }
