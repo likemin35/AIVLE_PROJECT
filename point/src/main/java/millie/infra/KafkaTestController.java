@@ -1,24 +1,26 @@
 package millie.infra;
 
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import millie.domain.UserRegistered;
-
 
 @RestController
 @RequestMapping("/test")
 public class KafkaTestController {
 
+    // ✅ 쿼리 파라미터로 유저 정보 전달 가능하게 수정
     @PostMapping("/register")
-    public String sendTestEvent() {
+    public String sendTestEvent(
+        @RequestParam Long userId,
+        @RequestParam String userName,
+        @RequestParam String telecom
+    ) {
         UserRegistered event = new UserRegistered();
-        //event.setPointId(999L);
-        event.setUserName("테스터");
-        event.setTelecom("KT");
+        event.setUserId(userId);
+        event.setUserName(userName);
+        event.setTelecom(telecom);
 
-        event.publish(); //  AbstractEvent에서 제공하는 메서드
+        event.publish(); // Kafka 발행
 
-        return "✅ Kafka 이벤트 전송 완료 (AbstractEvent 사용)";
+        return "✅ Kafka 이벤트 전송 완료";
     }
 }

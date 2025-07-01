@@ -31,6 +31,8 @@ public class Point {
 
     private Boolean isSubscription;
 
+    private String userName;
+
     public static PointRepository repository() {
         PointRepository pointRepository = PointApplication.applicationContext.getBean(PointRepository.class);
         return pointRepository;
@@ -42,6 +44,7 @@ public class Point {
         point.setUserId(userRegistered.getUserId());
         point.setIsSubscription(false); // ✅ Boolean 인자 넘김
         point.setIsPurchase(false);
+        point.setUserName(userRegistered.getUserName());
 
         int basePoint = 1000;
         if ("KT".equalsIgnoreCase(userRegistered.getTelecom())) {
