@@ -28,6 +28,10 @@ public class PolicyHandler {
     @Autowired
     SubscriptionRepository subscriptionRepository;
 
+    // 🔄 GetSubscription ReadModel 서비스 추가
+    @Autowired
+    GetSubscriptionService getSubscriptionService;
+
     private void processSubscription(Long userId, Long bookId) {
         Subscription subscription = new Subscription();
         subscription.setUserId(new UserId(userId));
@@ -48,6 +52,9 @@ public class PolicyHandler {
 
         SubscriptionApplied applied = new SubscriptionApplied(subscription);
         applied.publishAfterCommit();
+
+        // 🔄 GetSubscription ReadModel 업데이트
+        getSubscriptionService.updateOnSubscriptionApplied(applied);
 
         System.out.println(">>> 구독 처리 완료: userId = " + userId + ", bookId = " + bookId);
     }
@@ -87,6 +94,9 @@ public class PolicyHandler {
                     System.out.println(">>> [수신] SubscriptionFailed 이벤트");
                     SubscriptionFailed subscriptionFailed = mapper.convertValue(event, SubscriptionFailed.class);
                     User.guideFeeConversionSuggestion(subscriptionFailed);
+
+                    // 🔄 GetSubscription ReadModel 업데이트 (실패 기록)
+                    getSubscriptionService.updateOnSubscriptionFailed(subscriptionFailed);
                     break;
                 }
 
@@ -150,22 +160,20 @@ public class PolicyHandler {
                         return;
 
                     User user = new User();
-                    user.setId(userRegistered.getId());
                     user.setEmail(userRegistered.getEmail());
                     user.setUserName(userRegistered.getUserName());
                     user.setPhoneNumber(userRegistered.getPhoneNumber());
                     user.setIsPurchase(false);
-                    user.setIsKt(false);
+                    user.setIsKt(userRegistered.getIsKt());
 
-                    userRepository.save(user);
-                    Optional<User> existing = userRepository.findById(userRegistered.getId());
-                    if (existing.isPresent()) {
-                        System.out.println(">>> 이미 등록된 사용자: userId = " + userRegistered.getId());
-                        return; // 중복 등록 방지
-                    }
+                    User savedUser = userRepository.save(user);
+                    // 🔧 UserId 설정 추가
+                    savedUser.setUserId(new UserId(savedUser.getId()));
+                    userRepository.save(savedUser);
+                    System.out.println(
+                            ">>> 사용자 등록 완료: userId = " + savedUser.getId() + ", userName = " + savedUser.getUserName());
                     break;
                 }
-
                 case "SubscriptionBought": {
                     System.out.println(">>> [수신] SubscriptionBought 이벤트");
                     SubscriptionBought bought = mapper.convertValue(event, SubscriptionBought.class);

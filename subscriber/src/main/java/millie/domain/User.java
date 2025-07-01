@@ -33,12 +33,6 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Subscription> subscriptions;
 
-    @PostPersist
-    public void onPostPersist() {
-        UserRegistered userRegistered = new UserRegistered(this);
-        userRegistered.publishAfterCommit();
-    }
-
     public static UserRepository repository() {
         UserRepository userRepository = SubscriberApplication.applicationContext.getBean(
                 UserRepository.class);
