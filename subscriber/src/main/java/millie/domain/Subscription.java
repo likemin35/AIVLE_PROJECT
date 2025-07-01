@@ -70,7 +70,7 @@ public class Subscription {
                         userId.setId(((Number) outOfPoint.getUserId()).longValue());
                     } else if (outOfPoint.getUserId() instanceof String) {
                         try {
-                            userId.setId(Long.parseLong((String) outOfPoint.getUserId()));
+                            userId.setId(Long.parseLong(outOfPoint.getUserId().toString()));
                         } catch (NumberFormatException e) {
                             System.err.println("Invalid user ID format: " + outOfPoint.getUserId());
                         }

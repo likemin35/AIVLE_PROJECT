@@ -110,7 +110,7 @@ public class User {
                             "구독에 실패했습니다. 포인트 부족으로 인해 구독을 진행할 수 없습니다. " +
                             "유료 구독으로 전환하시겠습니까? 책 ID: %s, 구독 ID: %s",
                             subscriptionFailed.getBookId() != null ? subscriptionFailed.getBookId().getId() : "N/A",
-                            subscriptionFailed.getId() != null ? subscriptionFailed.getId() : "N/A"
+                            subscriptionFailed.getId() != null ? subscriptionFailed.getId().toString() : "N/A"
                         );
                         
                         user.setMseeage(suggestionMessage);

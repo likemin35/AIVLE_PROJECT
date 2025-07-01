@@ -20,12 +20,17 @@ public class UserController {
     @Autowired
     UserRepository userRepository;
 
-    @RequestMapping(value = "/users/{id}/buysubscription", method = RequestMethod.PUT, produces = "application/json;charset=UTF-8")
+    @RequestMapping(
+        value = "/users/{id}/buysubscription",
+        method = RequestMethod.PUT,
+        produces = "application/json;charset=UTF-8"
+    )
     public User buySubscription(
-            @PathVariable(value = "id") Long id,
-            @RequestBody BuySubscriptionCommand buySubscriptionCommand,
-            HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
+        @PathVariable(value = "id") Long id,
+        @RequestBody BuySubscriptionCommand buySubscriptionCommand,
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) throws Exception {
         System.out.println("##### /user/buySubscription  called #####");
         Optional<User> optionalUser = userRepository.findById(id);
 
@@ -37,12 +42,17 @@ public class UserController {
         return user;
     }
 
-    @RequestMapping(value = "/users/{id}/cancelsubscription", method = RequestMethod.PUT, produces = "application/json;charset=UTF-8")
+    @RequestMapping(
+        value = "/users/{id}/cancelsubscription",
+        method = RequestMethod.PUT,
+        produces = "application/json;charset=UTF-8"
+    )
     public User cancelSubscription(
-            @PathVariable(value = "id") Long id,
-            @RequestBody CancelSubscriptionCommand cancelSubscriptionCommand,
-            HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
+        @PathVariable(value = "id") Long id,
+        @RequestBody CancelSubscriptionCommand cancelSubscriptionCommand,
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) throws Exception {
         System.out.println("##### /user/cancelSubscription  called #####");
         Optional<User> optionalUser = userRepository.findById(id);
 
@@ -53,21 +63,5 @@ public class UserController {
         userRepository.save(user);
         return user;
     }
-
-    @RequestMapping(value = "/users", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-    public User registerUser(
-            @RequestBody User user,
-            HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
-        System.out.println("사용자 등록 호출됨");
-
-        // 기본값 세팅 (선택)
-        user.setIsPurchase(false);
-        user.setMessage(null);
-
-        // 저장
-        return userRepository.save(user);
-    }
 }
-
-// >>> Clean Arch / Inbound Adaptor
+//>>> Clean Arch / Inbound Adaptor
