@@ -44,7 +44,9 @@ logging:
   level:
     org.hibernate.type: trace
     org.springframework.cloud: debug
-
+    millie: debug  # 디버깅을 위한 로그 레벨 추가
+    org.springframework.cloud.stream: debug
+    org.apache.kafka: debug
 
 server:
   port: 8085
@@ -81,4 +83,10 @@ spring:
           destination: millie
           contentType: application/json
 
-
+logging:
+  level:
+    org.hibernate.type: trace
+    org.springframework.cloud: debug
+    millie: debug
+    org.springframework.cloud.stream: debug
+    org.apache.kafka: debug

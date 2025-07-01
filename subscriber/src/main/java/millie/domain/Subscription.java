@@ -15,54 +15,90 @@ import millie.domain.SubscriptionFailed;
 @Entity
 @Table(name = "Subscription_table")
 @Data
-// <<< DDD / Aggregate Root
+//<<< DDD / Aggregate Root
 public class Subscription {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
     private Boolean isSubscription;
+
     private Date rentalstart;
+
     private Date rentalend;
+
     private String webUrl;
+
     @Embedded
-    @AttributeOverride(name = "id", column = @Column(name = "book_id_id"))
     private BookId bookId;
 
     @Embedded
-    @AttributeOverride(name = "id", column = @Column(name = "user_id_id"))
     private UserId userId;
 
-    // @PostPersist
-    // public void onPostPersist() {
-    // SubscriptionApplied applied = new SubscriptionApplied(this);
-    // applied.publishAfterCommit();
-    // }
+    @PostPersist
+    public void onPostPersist() {
+        SubscriptionApplied subscriptionApplied = new SubscriptionApplied(this);
+        subscriptionApplied.publishAfterCommit();
+    }
 
     public static SubscriptionRepository repository() {
         SubscriptionRepository subscriptionRepository = SubscriberApplication.applicationContext.getBean(
-                SubscriptionRepository.class);
+            SubscriptionRepository.class
+        );
         return subscriptionRepository;
     }
 
-    // <<< Clean Arch / Port Method
+    //<<< Clean Arch / Port Method
     public static void failSubscription(OutOfPoint outOfPoint) {
-        if (outOfPoint.getUserId() == null)
-            return;
+        System.out.println("Processing subscription failure due to out of points...");
+        
+        try {
+            // 포인트 부족으로 인한 구독 실패 처리
+            if (outOfPoint != null) {
+                System.out.println("OutOfPoint event received - User: " + outOfPoint.getUserId() + 
+                                 ", SubscriptionId: " + outOfPoint.getSubscriptionId());
+                
+                // 새로운 구독 실패 기록 생성
+                Subscription failedSubscription = new Subscription();
+                failedSubscription.setIsSubscription(false);
+                
+                // UserId 설정
+                if (outOfPoint.getUserId() != null) {
+                    UserId userId = new UserId();
+                    if (outOfPoint.getUserId() instanceof Number) {
+                        userId.setId(((Number) outOfPoint.getUserId()).longValue());
+                    } else if (outOfPoint.getUserId() instanceof String) {
+                        try {
+                            userId.setId(Long.parseLong((String) outOfPoint.getUserId()));
+                        } catch (NumberFormatException e) {
+                            System.err.println("Invalid user ID format: " + outOfPoint.getUserId());
+                        }
+                    }
+                    failedSubscription.setUserId(userId);
+                }
+                
+                // 현재 시간으로 실패 시간 설정
+                failedSubscription.setRentalstart(new Date());
+                failedSubscription.setRentalend(new Date());
+                
+                // 저장
+                repository().save(failedSubscription);
+                System.out.println("Subscription failure recorded with ID: " + failedSubscription.getId());
 
-        UserId embeddedUserId = new UserId(outOfPoint.getUserId());
-
-        repository().findByUserId(embeddedUserId).ifPresent(subscription -> {
-            subscription.setIsSubscription(false); // 구독 취소 처리
-            repository().save(subscription);
-
-            SubscriptionFailed subscriptionFailed = new SubscriptionFailed(subscription);
-            subscriptionFailed.publishAfterCommit();
-
-            System.out.println("Subscription failed due to out of point. userId = " + embeddedUserId.getId());
-        });
+                // 구독 실패 이벤트 발행
+                SubscriptionFailed subscriptionFailed = new SubscriptionFailed(failedSubscription);
+                subscriptionFailed.publishAfterCommit();
+                
+                System.out.println("SubscriptionFailed event published");
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error in failSubscription: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
-    // >>> Clean Arch / Port Method
+    //>>> Clean Arch / Port Method
 
 }
-// >>> DDD / Aggregate Root
+//>>> DDD / Aggregate Root

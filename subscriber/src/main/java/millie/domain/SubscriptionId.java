@@ -13,7 +13,7 @@ import org.springframework.beans.BeanUtils;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserId {
+public class SubscriptionId {
 
     private Long id;
 }
