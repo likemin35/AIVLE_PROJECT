@@ -5,20 +5,13 @@ spring:
   application:
     name: ai
 
-# OpenAI API 설정
 openai:
   api:
-    key: ${OPENAI_API_KEY:your-openai-api-key-here}
+    key: Bearer sk-
     url: https://api.openai.com/v1/chat/completions
     image-url: https://api.openai.com/v1/images/generations
 
-# 애플리케이션 설정
-app:
-  storage:
-    path: ./storage
-  base:
-    url: http://localhost:8087
-    
+
 ---
 
 spring:
