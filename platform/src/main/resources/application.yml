@@ -19,6 +19,7 @@ spring:
       kafka:
         binder:
           brokers: localhost:9092
+          # auto-create-topics: true
         streams:
           binder:
             configuration:

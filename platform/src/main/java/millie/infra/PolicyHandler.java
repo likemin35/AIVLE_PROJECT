@@ -35,7 +35,11 @@ public class PolicyHandler {
             "\n\n##### listener GrantBadge : " + subscriptionApplied + "\n\n"
         );
         // Sample Logic //
-
+        Published published = new Published();
+        published.setId((Long) event.getBookId());
+        published.setPdfPath(event.getPdfPath());
+        
+        Book.registerBook(published);
     }
 
     @StreamListener(

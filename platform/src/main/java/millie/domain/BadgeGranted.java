@@ -15,10 +15,12 @@ public class BadgeGranted extends AbstractEvent {
     private String bookName;
     private Boolean isBestSeller;
     private Integer subscriptionCount;
-    private String views;
+    private Integer views;
 
     public BadgeGranted(Book aggregate) {
         super(aggregate);
+        this.id = aggregate.getId();
+        this.isBestSeller = aggregate.getIsBestSeller();
     }
 
     public BadgeGranted() {

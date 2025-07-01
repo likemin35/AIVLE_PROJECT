@@ -15,7 +15,8 @@ public class BookRegistered extends AbstractEvent {
     private String bookName;
     private String category;
     private Boolean isBestSeller;
-    private String bookContent;
+    private String summaryContent;
+    private Integer point;
 
     public BookRegistered(Book aggregate) {
         super(aggregate);
