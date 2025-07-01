@@ -46,40 +46,53 @@ public class Book {
     public static void registerBook(Published published) {
         
         Book book = new Book();
-        repository().save(book);
-
+        
         book.setBookName(published.getBookName());
         book.setCategory(published.getCategory());
+        book.setIsBestSeller(false);
+        book.setViewCount(0);
         
-        // book.setIsBestSeller();
-        
+        repository().save(book);
 
-        // book.setIsBestSeller(published.get);
         BookRegistered bookRegistered = new BookRegistered(book);
         bookRegistered.publishAfterCommit();
      
-
-        /** Example 2:  finding and process
-        
-        // if published.llmIdmanuscriptId exists, use it
-        
-        // ObjectMapper mapper = new ObjectMapper();
-        // Map<, Object> publishingMap = mapper.convertValue(published.getLlmId(), Map.class);
-        // Map<Long, Object> publishingMap = mapper.convertValue(published.getManuscriptId(), Map.class);
-
-        repository().findById(published.get???()).ifPresent(book->{
-            
-            book // do something
-            repository().save(book);
-
-            BookRegistered bookRegistered = new BookRegistered(book);
-            bookRegistered.publishAfterCommit();
-
-         });
-        */
-
     }
     //>>> Clean Arch / Port Method
+
+    //<<< Clean Arch / Port Method
+public static void grantBestsellerBadge(SubscriptionApplied subscriptionApplied) {
+    
+    Long bookId = Long.valueOf(subscriptionApplied.getBookId().toString());
+    Optional<Book> optionalBook = repository().findById(bookId);
+    
+    if (optionalBook.isPresent()) {
+        Book book = optionalBook.get();
+        
+        // 대여가 성공적으로 적용된 경우
+        if (subscriptionApplied.getIsSubscription()) {
+            
+            // 대여 시 조회수 증가
+            book.setViewCount(book.getViewCount() + 1);
+            
+            // 베스트셀러 조건 확인 (조회수 30회 이상)
+            if (book.getViewCount() >= 30 && !book.getIsBestSeller()) {
+                book.setIsBestSeller(true);
+                
+                BadgeGranted badgeGranted = new BadgeGranted(book);
+                badgeGranted.publishAfterCommit();
+            }
+            
+            repository().save(book);
+        }
+    }
+}
+//>>> Clean Arch / Port Method
+
+
+
+
+
 
 }
 //>>> DDD / Aggregate Root
