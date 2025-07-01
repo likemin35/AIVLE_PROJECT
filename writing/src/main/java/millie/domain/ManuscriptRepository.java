@@ -1,13 +1,13 @@
 package millie.domain;
 
-import millie.domain.*;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-//<<< PoEAA / Repository
 @RepositoryRestResource(
     collectionResourceRel = "manuscripts",
     path = "manuscripts"
 )
-public interface ManuscriptRepository
-    extends PagingAndSortingRepository<Manuscript, Long> {}
+public interface ManuscriptRepository extends JpaRepository<Manuscript, Long> {
+    List<Manuscript> findByTitle(String title);
+}
