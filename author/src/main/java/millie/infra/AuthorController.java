@@ -7,8 +7,6 @@ import javax.transaction.Transactional;
 import millie.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 //<<< Clean Arch / Inbound Adaptor
 
@@ -21,45 +19,47 @@ public class AuthorController {
     AuthorRepository authorRepository;
 
     @RequestMapping(
-        value = "/authors/{id}/approveauthor",
-        method = RequestMethod.PUT,
+        value = "/authors/{authorId}/approveauthor",
+        method = RequestMethod.PATCH,
         produces = "application/json;charset=UTF-8"
     )
     public Author approveAuthor(
-        @PathVariable(value = "id") Long id,
-        @RequestBody ApproveAuthorCommand approveAuthorCommand,
+        @PathVariable(value = "authorId") Long authorId,
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
         System.out.println("##### /author/approveAuthor  called #####");
-        Optional<Author> optionalAuthor = authorRepository.findById(id);
+        Optional<Author> optionalAuthor = authorRepository.findById(authorId);
 
         optionalAuthor.orElseThrow(() -> new Exception("No Entity Found"));
         Author author = optionalAuthor.get();
-        author.approveAuthor(approveAuthorCommand);
+        ApproveAuthorCommand cmd = new ApproveAuthorCommand();
+        cmd.setIsApprove(true);
 
+        author.approveAuthor(cmd);
         authorRepository.save(author);
         return author;
     }
 
     @RequestMapping(
-        value = "/authors/{id}/disapproveauthor",
-        method = RequestMethod.PUT,
+        value = "/authors/{authorId}/disapproveauthor",
+        method = RequestMethod.PATCH,
         produces = "application/json;charset=UTF-8"
     )
     public Author disapproveAuthor(
-        @PathVariable(value = "id") Long id,
-        @RequestBody DisapproveAuthorCommand disapproveAuthorCommand,
+        @PathVariable(value = "authorId") Long authorId,
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
         System.out.println("##### /author/disapproveAuthor  called #####");
-        Optional<Author> optionalAuthor = authorRepository.findById(id);
+        Optional<Author> optionalAuthor = authorRepository.findById(authorId);
 
         optionalAuthor.orElseThrow(() -> new Exception("No Entity Found"));
         Author author = optionalAuthor.get();
-        author.disapproveAuthor(disapproveAuthorCommand);
+        DisapproveAuthorCommand cmd = new DisapproveAuthorCommand();
+        cmd.setIsApprove(false);
 
+        author.disapproveAuthor(cmd);
         authorRepository.save(author);
         return author;
     }
