@@ -6,6 +6,8 @@ import millie.domain.*;
 import millie.infra.AbstractEvent;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ToString
 public class PublishingRequested extends AbstractEvent {
 
