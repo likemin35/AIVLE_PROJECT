@@ -4,16 +4,17 @@ import lombok.RequiredArgsConstructor;
 import millie.domain.Manuscript;
 import millie.domain.ManuscriptRepository;
 import millie.domain.RequestPublishCommand;
-import org.springframework.http.ResponseEntity;
-
-import org.springframework.web.bind.annotation.*;
 import millie.domain.RegisterManuscriptCommand;
 import millie.domain.AuthorId;
 import millie.domain.Status;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
-@RequestMapping("/manuscripts")
+@RequestMapping("/writing")  
 @RequiredArgsConstructor
 public class WritingController {
 
