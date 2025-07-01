@@ -15,6 +15,7 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 )
 public interface SubscriptionRepository
     extends PagingAndSortingRepository<Subscription, Long> {
+    
     @Query(
     value = "select subscription " +
             "from Subscription subscription " +
@@ -35,10 +36,8 @@ public interface SubscriptionRepository
         BookId bookId,
         UserId userId,
         Pageable pageable
-        
     );
+    
     Optional<Subscription> findByUserId(UserId userId);
     List<Subscription> findByUserIdAndIsSubscription(UserId userId, Boolean isSubscription);
-
-
 }

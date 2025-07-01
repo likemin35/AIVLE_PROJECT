@@ -146,7 +146,12 @@ public class PolicyHandler {
                         KafkaProcessor processor = SubscriberApplication.applicationContext
                                 .getBean(KafkaProcessor.class);
                         processor.outboundTopic().send(
-                                org.springframework.messaging.support.MessageBuilder.withPayload(payload).build());
+                                org.springframework.messaging.support.MessageBuilder
+                                        .withPayload(payload)
+                                        .setHeader("type", "DecreasePoint") // ✅ type 헤더 명시적 설정
+                                        .setHeader(org.springframework.messaging.MessageHeaders.CONTENT_TYPE,
+                                                org.springframework.util.MimeTypeUtils.APPLICATION_JSON)
+                                        .build());
 
                         System.out.println(">>> 구독권 없음: DecreasePoint 요청 전송 완료");
                     }
@@ -172,6 +177,29 @@ public class PolicyHandler {
                     userRepository.save(savedUser);
                     System.out.println(
                             ">>> 사용자 등록 완료: userId = " + savedUser.getId() + ", userName = " + savedUser.getUserName());
+
+                    // ✅ 여기에 RegisterPointGained 이벤트 발행 추가
+                    int basePoint = 1000;
+                    if (Boolean.TRUE.equals(savedUser.getIsKt())) {
+                        basePoint += 5000;
+                    }
+
+                    Map<String, Object> pointEvent = Map.of(
+                            "eventType", "RegisterPointGained",
+                            "userId", savedUser.getId(),
+                            "point", String.valueOf(basePoint),
+                            "isKt", savedUser.getIsKt());
+
+                    ObjectMapper outMapper = new ObjectMapper();
+                    String payload = outMapper.writeValueAsString(pointEvent);
+
+                    KafkaProcessor processor = SubscriberApplication.applicationContext.getBean(KafkaProcessor.class);
+                    processor.outboundTopic().send(
+                            org.springframework.messaging.support.MessageBuilder.withPayload(payload).build());
+
+                    System.out.println(
+                            ">>> RegisterPointGained 이벤트 발행 완료: userId=" + savedUser.getId() + ", point=" + basePoint);
+
                     break;
                 }
 

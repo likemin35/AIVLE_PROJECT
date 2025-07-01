@@ -12,12 +12,12 @@ public class KafkaTestController {
     public String sendTestEvent(
         @RequestParam Long userId,
         @RequestParam String userName,
-        @RequestParam String telecom
+        @RequestParam Boolean isKt
     ) {
         UserRegistered event = new UserRegistered();
         event.setUserId(userId);
         event.setUserName(userName);
-        event.setTelecom(telecom);
+        event.setIsKt(isKt);
 
         event.publish(); // Kafka 발행
 

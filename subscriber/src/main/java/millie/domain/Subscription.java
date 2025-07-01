@@ -25,9 +25,6 @@ public class Subscription {
     private Date rentalstart;
     private Date rentalend;
     private String webUrl;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_ref_id")
-    private User user;
     @Embedded
     @AttributeOverride(name = "id", column = @Column(name = "book_id_id"))
     private BookId bookId;
