@@ -11,9 +11,9 @@ import millie.infra.AbstractEvent;
 @ToString
 public class PointBought extends AbstractEvent {
 
-    private Long id;
+    private Long pointId;
     private Integer point;
-    private UserId userId;
+    private Long userId;
 
     public PointBought(Point aggregate) {
         super(aggregate);

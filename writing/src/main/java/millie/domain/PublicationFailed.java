@@ -9,7 +9,7 @@ import millie.infra.AbstractEvent;
 @ToString
 public class PublicationFailed extends AbstractEvent {
 
-    private Long id;
+    private Long bookId;
     private String image;
     private String summaryContent;
     private String bookName;

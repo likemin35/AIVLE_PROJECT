@@ -11,7 +11,7 @@ import millie.infra.AbstractEvent;
 @ToString
 public class AuthorRegistered extends AbstractEvent {
 
-    private Long id;
+    private Long authorId;
     private String email;
     private String authorName;
     private String introduction;

@@ -1,84 +1,55 @@
 server:
-  port: 8080
+  port: 8084
+  error:
+    include-message: always  # 예외 메시지를 HTTP 응답에 포함
 
 spring:
   application:
     name: point
----
 
-spring:
-  profiles: default
+  datasource:
+    url: jdbc:h2:file:./data/pointdb  # 파일 기반 H2 DB
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    initialization-mode: always
+
   jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    defer-datasource-initialization: true
     properties:
       hibernate:
-        show_sql: true
         format_sql: true
         implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
+        jdbc:
+          time_zone: Asia/Seoul
+
+  sql:
+    init:
+      mode: always
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
   cloud:
     stream:
-      kafka:
-        binder:
-          brokers: localhost:9092
-        streams:
-          binder:
-            configuration:
-              default:
-                key:
-                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-                value:
-                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
       bindings:
         event-in:
           group: point
-#<<< EDA / Topic Name
           destination: millie
-#>>> EDA / Topic Name
           contentType: application/json
         event-out:
-#<<< EDA / Topic Name
           destination: millie
-#>>> EDA / Topic Name
           contentType: application/json
+      kafka:
+        binder:
+          brokers: localhost:9092  # ✅ 이게 Kafka 주소 설정임
 
 logging:
   level:
     org.hibernate.type: trace
-    org.springframework.cloud: debug
-
-
-server:
-  port: 8084
-
----
-
-spring:
-  profiles: docker
-  jpa:
-    properties:
-      hibernate:
-        show_sql: true
-        format_sql: true
-        implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
-  cloud:
-    stream:
-      kafka:
-        binder:
-          brokers: my-kafka:9092
-        streams:
-          binder:
-            configuration:
-              default:
-                key:
-                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-                value:
-                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-      bindings:
-        event-in:
-          group: point
-          destination: millie
-          contentType: application/json
-        event-out:
-          destination: millie
-          contentType: application/json
-
-
+    org.springframework.kafka: debug

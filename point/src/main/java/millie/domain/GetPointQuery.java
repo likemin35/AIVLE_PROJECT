@@ -6,9 +6,9 @@ import lombok.Data;
 @Data
 public class GetPointQuery {
 
-    private Long id;
+    private Long pointId;
     private Integer point;
-    private Boolean isSubscribe;
-    private UserId userId;
-    private SubscriptionId subscriptionId;
+    private Boolean isPurchase; // 구독권 구매 여부
+    private Long userId;
+    private Boolean isSubscription; // 책 구독 여부
 }
