@@ -26,37 +26,25 @@ public class PublishingService {
             publishing.setPdfPath("default.pdf");
             publishing.setWebUrl(event.getWebUrl() != null ? event.getWebUrl() : "https://millie.co.kr");
 
-            String summary = aiClient.summarizeContent(
-                    event.getTitle(),
-                    event.getAuthorId().toString(),
-                    String.valueOf(event.getId()),
-                    "",
-                    "",
-                    event.getCategory(),
-                    event.getWebUrl(),
-                    event.getContent()
-            );
+            // 수정된 aiClient 파라미터
+            String summary = aiClient.summarizeContent(event.getContent());
             publishing.setSummaryContent(summary);
 
             String imageUrl = aiClient.generateCover(
                     event.getTitle(),
-                    event.getAuthorId().toString(),
-                    "",
-                    String.valueOf(event.getId()),
-                    event.getCategory(),
-                    "",
-                    event.getWebUrl(),
-                    summary
+                    event.getAuthorId().toString()
             );
             publishing.setImage(imageUrl);
 
             int predictedCost = aiClient.predictBookPrice(
                     event.getTitle(),
-                    summary,
                     publishing.getCategory(),
+                    false,  // 베스트셀러 여부
+                    0,      // 조회수
                     event.getContent()
             );
             publishing.setCost(predictedCost);
+
 
             publishingRepository.save(publishing);
 
