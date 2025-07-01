@@ -99,8 +99,8 @@ public class User {
         try {
             if (subscriptionFailed != null && subscriptionFailed.getUserId() != null) {
                 
-                // userId로 사용자를 찾아서 유료 전환 제안 메시지 발송
-                Long userId = subscriptionFailed.getUserId().getId();
+                // userId는 이미 Long 타입이므로 직접 사용
+                Long userId = subscriptionFailed.getUserId();
                 
                 if (userId != null) {
                     repository().findById(userId).ifPresent(user -> {
@@ -109,7 +109,7 @@ public class User {
                         String suggestionMessage = String.format(
                             "구독에 실패했습니다. 포인트 부족으로 인해 구독을 진행할 수 없습니다. " +
                             "유료 구독으로 전환하시겠습니까? 책 ID: %s, 구독 ID: %s",
-                            subscriptionFailed.getBookId() != null ? subscriptionFailed.getBookId().getId() : "N/A",
+                            subscriptionFailed.getBookId() != null ? subscriptionFailed.getBookId().toString() : "N/A",
                             subscriptionFailed.getId() != null ? subscriptionFailed.getId().toString() : "N/A"
                         );
                         

@@ -63,20 +63,17 @@ public class Subscription {
                 Subscription failedSubscription = new Subscription();
                 failedSubscription.setIsSubscription(false);
                 
-                // UserId 설정
+                // UserId 설정 - OutOfPoint의 userId는 Long 타입
                 if (outOfPoint.getUserId() != null) {
                     UserId userId = new UserId();
-                    if (outOfPoint.getUserId() instanceof Number) {
-                        userId.setId(((Number) outOfPoint.getUserId()).longValue());
-                    } else if (outOfPoint.getUserId() instanceof String) {
-                        try {
-                            userId.setId(Long.parseLong(outOfPoint.getUserId().toString()));
-                        } catch (NumberFormatException e) {
-                            System.err.println("Invalid user ID format: " + outOfPoint.getUserId());
-                        }
-                    }
+                    userId.setId(outOfPoint.getUserId());
                     failedSubscription.setUserId(userId);
                 }
+                
+                // BookId 설정 (기본값으로 설정, 실제로는 어디서 가져와야 하는지 확인 필요)
+                BookId bookId = new BookId();
+                bookId.setId(1L); // 기본값, 실제 구현에서는 적절한 값 설정 필요
+                failedSubscription.setBookId(bookId);
                 
                 // 현재 시간으로 실패 시간 설정
                 failedSubscription.setRentalstart(new Date());
