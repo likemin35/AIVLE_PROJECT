@@ -34,8 +34,11 @@ public class AiClient {
 
         RequestBody body = RequestBody.create(
                 mapper.writeValueAsString(Map.of(
-                        "model", "gpt-4o",
-                        "messages", List.of(Map.of("role", "user", "content", prompt))
+                        "model", "gpt-4o-mini",
+                        "messages", List.of(
+                                Map.of("role", "system", "content", "You are a helpful summarizer."),
+                                Map.of("role", "user", "content", prompt)
+                        )
                 )),
                 MediaType.parse("application/json")
         );
@@ -61,7 +64,7 @@ public class AiClient {
 
         RequestBody body = RequestBody.create(
                 mapper.writeValueAsString(Map.of(
-                        "model", "dall-e-3",
+                        "model", "gpt-4o-mini",
                         "prompt", imagePrompt,
                         "n", 1,
                         "size", "512x768"
@@ -97,7 +100,7 @@ public class AiClient {
 
         RequestBody body = RequestBody.create(
                 mapper.writeValueAsString(Map.of(
-                        "model", "gpt-4o",
+                        "model", "gpt-4o-mini",
                         "messages", List.of(Map.of("role", "user", "content", prompt))
                 )),
                 MediaType.parse("application/json")
