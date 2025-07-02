@@ -16,6 +16,12 @@ public class OutOfPoint extends AbstractEvent {
     private Long userId;
     private Boolean isSubscription;
 
+    // ✅ bookId 필드 추가
+    private Long bookId;
+
+    // ✅ eventType 필드 추가 (카프카 라우팅용)
+    private String eventType = "OutOfPoint";
+
     public OutOfPoint(Point aggregate) {
         super(aggregate);
     }
@@ -24,4 +30,3 @@ public class OutOfPoint extends AbstractEvent {
         super();
     }
 }
-//>>> DDD / Domain Event

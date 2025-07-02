@@ -58,18 +58,24 @@ public class Manuscript {
     //<<< Clean Arch / Port Method
     public void requestPublish(RequestPublishCommand requestPublishCommand) {
         System.out.println("📌 Request status: " + requestPublishCommand.getStatus());
+        System.out.println("📌 Request isApprove: " + requestPublishCommand.getIsApprove());
     
         try {
-            Status newStatus = Status.valueOf(requestPublishCommand.getStatus().toUpperCase()); // ✅ 소문자 대응
+            Status newStatus = Status.valueOf(requestPublishCommand.getStatus().toUpperCase());
             this.status = newStatus;
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("유효하지 않은 상태값입니다: " + requestPublishCommand.getStatus()); // ✅ 에러 메시지 명확
+            throw new RuntimeException("유효하지 않은 상태값입니다: " + requestPublishCommand.getStatus());
+        }
+    
+        if (requestPublishCommand.getIsApprove() != null) {
+            this.isApprove = requestPublishCommand.getIsApprove();
+        } else {
+            this.isApprove = true;  
         }
     
         PublishingRequested event = new PublishingRequested(this);
         event.publishAfterCommit();
     }
     //>>> Clean Arch / Port Method
-
 }
 //>>> DDD / Aggregate Root
