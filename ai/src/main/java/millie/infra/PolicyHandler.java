@@ -1,45 +1,49 @@
 package millie.infra;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import javax.naming.NameParser;
-import javax.naming.NameParser;
 import javax.transaction.Transactional;
-import millie.config.kafka.KafkaProcessor;
+
 import millie.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.*;
 
-//<<< Clean Arch / Inbound Adaptor
-@Service
+@RestController
+@RequestMapping("/publish")
 @Transactional
-public class PolicyHandler {
+public class PublishingController {
 
     @Autowired
     PublishingRepository publishingRepository;
 
     @Autowired
-    PublishingService publishingService;
+    AiClient aiClient;
 
-    @StreamListener(KafkaProcessor.INPUT)
-    public void whatever(@Payload String eventString) {}
+    @PostMapping
+    public Publishing createPublishing(@RequestBody Publishing publishing) throws Exception {
+        System.out.println(">>> POST /publish called");
+        // 1. 먼저 기본 정보 저장
+        Publishing saved = publishingRepository.save(publishing);
 
-    @StreamListener(
-        value = KafkaProcessor.INPUT,
-        condition = "headers['type']=='PublishingRequested'"
-    )
-    public void wheneverPublishingRequested_Publish(
-        @Payload PublishingRequested publishingRequested
-    ) {
-        PublishingRequested event = publishingRequested;
-        System.out.println(
-            "\n\n##### listener Publish : " + publishingRequested + "\n\n"
+        // 2. AI 를 통해 후처리
+        String summary = aiClient.summarizeContent(saved.getContent(), saved.getCategory());
+
+        String keywords = aiClient.extractKeywords(summary);
+        
+        String image = aiClient.generateCover(saved.getTitle(), saved.getCategory(), keywords);
+        int cost = aiClient.predictBookPrice(
+            saved.getTitle(),
+            saved.getCategory(),
+            false,
+            0,
+            saved.getContent()
         );
 
-        // Sample Logic //
-        publishingService.publish(event);
+        
+        saved.setSummaryContent(summary);
+        saved.setKeywords(keywords);
+        saved.setImage(image);
+        saved.setCost(cost);
+
+        
+        return publishingRepository.save(saved);
     }
 }
-//>>> Clean Arch / Inbound Adaptor
