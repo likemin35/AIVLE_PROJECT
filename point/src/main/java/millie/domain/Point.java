@@ -42,22 +42,26 @@ public class Point {
     public static void gainRegisterPoint(UserRegistered userRegistered) {
         Point point = new Point();
         point.setUserId(userRegistered.getUserId());
-        point.setIsSubscription(false); // ✅ Boolean 인자 넘김
+        point.setIsSubscription(false);
         point.setIsPurchase(false);
         point.setUserName(userRegistered.getUserName());
 
         int basePoint = 1000;
-        if (Boolean.TRUE.equals(userRegistered.getIsKt())) { // ✅ isKt로 변경
+        if (Boolean.TRUE.equals(userRegistered.getIsKt())) {
             basePoint += 5000;
         }
 
         point.setPoint(basePoint);
         repository().save(point);
 
-        RegisterPointGained event = new RegisterPointGained(point);
-        event.setPoint(String.valueOf(point.getPoint()));
-        event.setIsSubscription(point.getIsSubscription()); // ✅ Boolean 넘김
-        event.publishAfterCommit();
+        // ❌ 이 부분 제거 또는 주석처리
+        // RegisterPointGained event = new RegisterPointGained(point);
+        // event.setPoint(String.valueOf(point.getPoint()));
+        // event.setIsSubscription(point.getIsSubscription());
+        // event.publishAfterCommit();
+
+        System.out.println("✅ 포인트 지급 완료: userId=" + point.getUserId() +
+                ", point=" + point.getPoint() + "P");
     }
 
     // 구독 시 포인트 차감 로직

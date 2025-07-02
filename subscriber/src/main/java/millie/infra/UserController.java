@@ -50,7 +50,6 @@ public class UserController {
     @RequestMapping(value = "/users/{id}/cancelsubscription", method = RequestMethod.PUT, produces = "application/json;charset=UTF-8")
     public User cancelSubscription(
             @PathVariable(value = "id") Long id,
-            @RequestBody CancelSubscriptionCommand cancelSubscriptionCommand,
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         System.out.println("##### /user/cancelSubscription  called #####");
@@ -58,6 +57,11 @@ public class UserController {
 
         optionalUser.orElseThrow(() -> new Exception("No Entity Found"));
         User user = optionalUser.get();
+
+        // ✅ 자동으로 isPurchase=false로 설정하는 Command 생성
+        CancelSubscriptionCommand cancelSubscriptionCommand = new CancelSubscriptionCommand();
+        cancelSubscriptionCommand.setIsPurchase(false);
+
         user.cancelSubscription(cancelSubscriptionCommand);
 
         userRepository.save(user);

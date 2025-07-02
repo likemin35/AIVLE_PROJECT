@@ -27,19 +27,19 @@ public class PolicyHandler {
     public void whatever(@Payload String eventString) {
     }
 
-    @StreamListener(value = KafkaProcessor.INPUT, condition = "headers['type']=='UserRegistered'")
-    public void wheneverUserRegistered_GainRegisterPoint(
-            @Payload UserRegistered userRegistered) {
-        UserRegistered event = userRegistered;
-        System.out.println(
-                "\n\n##### listener GainRegisterPoint : " + userRegistered + "\n\n");
+    // @StreamListener(value = KafkaProcessor.INPUT, condition = "headers['type']=='UserRegistered'")
+    // public void wheneverUserRegistered_GainRegisterPoint(
+    //         @Payload UserRegistered userRegistered) {
+    //     UserRegistered event = userRegistered;
+    //     System.out.println(
+    //             "\n\n##### listener GainRegisterPoint : " + userRegistered + "\n\n");
 
-        // Sample Logic //
-        Point.gainRegisterPoint(event);
-    }
+    //     // Sample Logic //
+    //     Point.gainRegisterPoint(event);
+    // }
 
     @StreamListener(KafkaProcessor.INPUT)
-    public void wheneverDecreasePoint_HandleDecreasePoint(
+    public void wheneverEvent_HandleAllEvents(
             @Payload String eventString) {
 
         try {
@@ -49,7 +49,27 @@ public class PolicyHandler {
             Map<String, Object> event = mapper.readValue(eventString, Map.class);
             String eventType = (String) event.get("eventType");
 
-            if ("DecreasePoint".equals(eventType)) {
+            // ✅ RegisterPointGained 이벤트 처리 추가
+            if ("RegisterPointGained".equals(eventType)) {
+                System.out.println(">>> [수신] RegisterPointGained 이벤트");
+
+                // UserRegistered 형태로 변환해서 기존 로직 재사용
+                UserRegistered userRegistered = new UserRegistered();
+                userRegistered.setUserId(Long.valueOf(event.get("userId").toString()));
+                userRegistered.setEmail((String) event.get("email"));
+                userRegistered.setUserName((String) event.get("userName"));
+                userRegistered.setPhoneNumber((String) event.get("phoneNumber"));
+                userRegistered.setPassword((String) event.get("password"));
+                userRegistered.setIsKt((Boolean) event.get("isKt"));
+
+                // 기존 포인트 지급 로직 호출
+                Point.gainRegisterPoint(userRegistered);
+
+                System.out.println(">>> RegisterPointGained 처리 완료: userId=" +
+                        userRegistered.getUserId() + ", isKt=" + userRegistered.getIsKt());
+            }
+
+            else if ("DecreasePoint".equals(eventType)) {
                 System.out.println(">>> [수신] DecreasePoint 이벤트");
 
                 // ✅ DecreasePoint 객체로 변환
@@ -64,7 +84,7 @@ public class PolicyHandler {
                         decreasePoint.getUserId() + ", bookId=" + decreasePoint.getBookId());
             }
 
-            // ✅ ChargePoint 이벤트 처리 추가
+            // ✅ ChargePoint 이벤트 처리
             else if ("ChargePoint".equals(eventType)) {
                 System.out.println(">>> [수신] ChargePoint 이벤트");
 
