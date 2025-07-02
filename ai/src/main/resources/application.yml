@@ -4,6 +4,14 @@ server:
 spring:
   application:
     name: ai
+
+openai:
+  api:
+    key: sk-
+    url: https://api.openai.com/v1/chat/completions
+    image-url: https://api.openai.com/v1/images/generations
+
+
 ---
 
 spring:
