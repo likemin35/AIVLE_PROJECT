@@ -161,13 +161,14 @@ public class PolicyHandler {
                 case "UserRegistered": {
                     System.out.println(">>> [수신] UserRegistered 이벤트");
                     UserRegistered userRegistered = mapper.convertValue(event, UserRegistered.class);
-                    if (!userRegistered.validate())
+                    if (!userRegistered.validate()) // ✅ 유효성 검증 추가
                         return;
 
                     User user = new User();
                     user.setEmail(userRegistered.getEmail());
                     user.setUserName(userRegistered.getUserName());
                     user.setPhoneNumber(userRegistered.getPhoneNumber());
+                    user.setPassword(userRegistered.getPassword()); // ✅ 비밀번호 설정 추가
                     user.setIsPurchase(false);
                     user.setIsKt(userRegistered.getIsKt());
 
@@ -175,8 +176,10 @@ public class PolicyHandler {
                     // 🔧 UserId 설정 추가
                     savedUser.setUserId(new UserId(savedUser.getId()));
                     userRepository.save(savedUser);
-                    System.out.println(
-                            ">>> 사용자 등록 완료: userId = " + savedUser.getId() + ", userName = " + savedUser.getUserName());
+
+                    System.out.println(">>> 사용자 등록 완료: userId = " + savedUser.getId() +
+                            ", userName = " + savedUser.getUserName() +
+                            ", password = [보안상 숨김]"); // ✅ 보안을 위해 비밀번호는 로그에 출력하지 않음
 
                     // ✅ 여기에 RegisterPointGained 이벤트 발행 추가
                     int basePoint = 1000;
@@ -199,26 +202,6 @@ public class PolicyHandler {
 
                     System.out.println(
                             ">>> RegisterPointGained 이벤트 발행 완료: userId=" + savedUser.getId() + ", point=" + basePoint);
-
-                    break;
-                }
-
-                case "SubscriptionBought": {
-                    System.out.println(">>> [수신] SubscriptionBought 이벤트");
-                    SubscriptionBought bought = mapper.convertValue(event, SubscriptionBought.class);
-                    if (!bought.validate())
-                        return;
-
-                    UserId userIdObj = bought.getUserId();
-                    if (userIdObj == null || userIdObj.getId() == null)
-                        return;
-
-                    userRepository.findById(userIdObj.getId()).ifPresent(founduser -> {
-                        founduser.setIsPurchase(true);
-                        userRepository.save(founduser);
-                        System.out.println(">>> 구독권 구매 상태 반영 완료: userId = " + founduser.getId());
-                    });
-
                     break;
                 }
 
