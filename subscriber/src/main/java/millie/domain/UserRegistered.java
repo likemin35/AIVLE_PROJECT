@@ -17,6 +17,9 @@ public class UserRegistered extends AbstractEvent {
     private String phoneNumber;
     private Boolean isKt;
 
+    // ✅ 비밀번호 필드 추가
+    private String password;
+
     public UserRegistered(User aggregate) {
         super(aggregate);
         this.id = aggregate.getId();
@@ -24,11 +27,18 @@ public class UserRegistered extends AbstractEvent {
         this.userName = aggregate.getUserName();
         this.phoneNumber = aggregate.getPhoneNumber();
         this.isKt = aggregate.getIsKt();
-        
+        this.password = aggregate.getPassword(); // ✅ 비밀번호 포함
     }
 
     public UserRegistered() {
         super();
     }
+
+    // ✅ 유효성 검증 메서드 추가
+    public boolean validate() {
+        return email != null && !email.isEmpty() &&
+                userName != null && !userName.isEmpty() &&
+                password != null && !password.isEmpty();
+    }
 }
-//>>> DDD / Domain Event
+// >>> DDD / Domain Event

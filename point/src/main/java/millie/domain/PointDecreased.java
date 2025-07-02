@@ -15,6 +15,12 @@ public class PointDecreased extends AbstractEvent {
     private Long userId;
     private Boolean isSubscription;
 
+    // ✅ bookId 필드 추가
+    private Long bookId;
+
+    // ✅ eventType 필드 추가 (카프카 라우팅용)
+    private String eventType = "PointDecreased";
+
     public PointDecreased(Point aggregate) {
         super(aggregate);
     }
@@ -23,4 +29,4 @@ public class PointDecreased extends AbstractEvent {
         super();
     }
 }
-//>>> DDD / Domain Event
+// >>> DDD / Domain Event

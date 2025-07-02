@@ -38,64 +38,53 @@ public class PolicyHandler {
         Point.gainRegisterPoint(event);
     }
 
-    @StreamListener(value = KafkaProcessor.INPUT, condition = "headers['type']=='SubscriptionApplied'")
-    public void wheneverSubscriptionApplied_DecreasePoint(
-            @Payload SubscriptionApplied subscriptionApplied) {
-        SubscriptionApplied event = subscriptionApplied;
-        System.out.println(
-                "\n\n##### listener DecreasePoint : " + subscriptionApplied + "\n\n");
-
-        // Sample Logic //
-        Point.decreasePoint(event);
-    }
-
-    @StreamListener(value = KafkaProcessor.INPUT, condition = "headers['type']=='DecreasePoint'")
+    @StreamListener(KafkaProcessor.INPUT)
     public void wheneverDecreasePoint_HandleDecreasePoint(
             @Payload String eventString) {
-        System.out.println(">>> [DEBUG] DecreasePoint 핸들러 진입");
 
         try {
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
             Map<String, Object> event = mapper.readValue(eventString, Map.class);
+            String eventType = (String) event.get("eventType");
 
-            Long userId = Long.valueOf(event.get("userId").toString());
-            Long bookId = Long.valueOf(event.get("bookId").toString());
+            if ("DecreasePoint".equals(eventType)) {
+                System.out.println(">>> [수신] DecreasePoint 이벤트");
 
-            System.out.println(">>> [수신] DecreasePoint 이벤트: userId=" + userId + ", bookId=" + bookId);
+                // ✅ DecreasePoint 객체로 변환
+                DecreasePoint decreasePoint = new DecreasePoint();
+                decreasePoint.setUserId(Long.valueOf(event.get("userId").toString()));
+                decreasePoint.setBookId(Long.valueOf(event.get("bookId").toString()));
 
-            // 포인트 차감 처리
-            SubscriptionApplied subscriptionEvent = new SubscriptionApplied();
-            subscriptionEvent.setUserId(userId);
-            subscriptionEvent.setBookId(bookId);
-            subscriptionEvent.setIsSubscription(false);
+                // ✅ Point.decreasePoint 호출
+                Point.decreasePoint(decreasePoint);
 
-            Point.decreasePoint(subscriptionEvent);
+                System.out.println(">>> DecreasePoint 처리 완료: userId=" +
+                        decreasePoint.getUserId() + ", bookId=" + decreasePoint.getBookId());
+            }
 
-            // ✅ 포인트 차감 성공 후 PointDecreased 이벤트 발행
-            Map<String, Object> decreasedEvent = Map.of(
-                    "eventType", "PointDecreased",
-                    "userId", userId,
-                    "bookId", bookId,
-                    "decreasedAmount", 100);
+            // ✅ ChargePoint 이벤트 처리 추가
+            else if ("ChargePoint".equals(eventType)) {
+                System.out.println(">>> [수신] ChargePoint 이벤트");
 
-            ObjectMapper outMapper = new ObjectMapper();
-            String payload = outMapper.writeValueAsString(decreasedEvent);
+                // ChargePoint 객체로 변환
+                ChargePoint chargePoint = new ChargePoint();
+                chargePoint.setUserId(Long.valueOf(event.get("userId").toString()));
+                chargePoint.setAmount(Integer.valueOf(event.get("amount").toString()));
 
-            KafkaProcessor processor = PointApplication.applicationContext.getBean(KafkaProcessor.class);
-            processor.outboundTopic().send(
-                    org.springframework.messaging.support.MessageBuilder
-                            .withPayload(payload)
-                            .setHeader("type", "PointDecreased")
-                            .build());
+                // Point.chargePoint 호출
+                Point.chargePoint(chargePoint);
 
-            System.out.println(">>> PointDecreased 이벤트 발행 완료: userId=" + userId);
+                System.out.println(">>> ChargePoint 처리 완료: userId=" +
+                        chargePoint.getUserId() + ", amount=" + chargePoint.getAmount());
+            }
 
         } catch (Exception e) {
-            System.err.println(">>> DecreasePoint 처리 오류: " + e.getMessage());
+            System.err.println(">>> [오류] 이벤트 처리 중 오류: " + e.getMessage());
             e.printStackTrace();
         }
     }
+
 }
 // >>> Clean Arch / Inbound Adaptor
