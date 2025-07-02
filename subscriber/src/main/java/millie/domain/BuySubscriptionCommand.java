@@ -8,4 +8,5 @@ import lombok.Data;
 public class BuySubscriptionCommand {
 
     private Boolean isPurchase;
+    private Long userId;
 }

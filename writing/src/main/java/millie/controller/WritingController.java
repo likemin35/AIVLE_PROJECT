@@ -4,26 +4,28 @@ import lombok.RequiredArgsConstructor;
 import millie.domain.Manuscript;
 import millie.domain.ManuscriptRepository;
 import millie.domain.RequestPublishCommand;
-import org.springframework.http.ResponseEntity;
-
-import org.springframework.web.bind.annotation.*;
 import millie.domain.RegisterManuscriptCommand;
 import millie.domain.AuthorId;
 import millie.domain.Status;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
-@RequestMapping("/manuscripts")
+@RequestMapping("/writing")  
 @RequiredArgsConstructor
 public class WritingController {
 
     private final ManuscriptRepository manuscriptRepository;
 
+    // 출간 요청 시 isApprove도 포함해서 전달됨
     @PostMapping("/{bookId}/request-publish")
     public ResponseEntity<?> requestPublish(@PathVariable("bookId") Long bookId, @RequestBody RequestPublishCommand cmd) {
         Manuscript manuscript = manuscriptRepository.findById(bookId)
             .orElseThrow(() -> new RuntimeException("원고를 찾을 수 없습니다."));
-        manuscript.requestPublish(cmd);
+        manuscript.requestPublish(cmd);  // isApprove 포함된 cmd 전달
         manuscriptRepository.save(manuscript);
         return ResponseEntity.ok().build();
     }

@@ -1,29 +1,32 @@
 package millie.domain;
 
-import java.time.LocalDate;
-import java.util.*;
+import java.util.Date;
 import lombok.*;
-import millie.domain.*;
 import millie.infra.AbstractEvent;
 
-//<<< DDD / Domain Event
 @Data
 @ToString
 public class SubscriptionFailed extends AbstractEvent {
 
     private Long id;
+    private Long bookId;
+    private Long userId;
     private Boolean isSubscription;
-    private BookId bookId;
-    private UserId userId;
     private Date startSubscription;
     private Date endSubscription;
+    private String message;
 
     public SubscriptionFailed(Subscription aggregate) {
         super(aggregate);
+        this.id = aggregate.getId();
+        this.bookId = aggregate.getBookId() != null ? aggregate.getBookId().getId() : null;
+        this.userId = aggregate.getUserId() != null ? aggregate.getUserId().getId() : null;
+        this.isSubscription = aggregate.getIsSubscription();
+        this.startSubscription = aggregate.getRentalstart();
+        this.endSubscription = aggregate.getRentalend();
     }
 
     public SubscriptionFailed() {
         super();
     }
 }
-//>>> DDD / Domain Event

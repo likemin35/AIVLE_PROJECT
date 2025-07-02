@@ -16,7 +16,7 @@ import java.util.Comparator;
 @Builder
 @Entity
 @Table(name = "Point_table")
-//<<< DDD / Aggregate Root
+// <<< DDD / Aggregate Root
 public class Point {
 
     @Id
@@ -47,7 +47,7 @@ public class Point {
         point.setUserName(userRegistered.getUserName());
 
         int basePoint = 1000;
-        if ("KT".equalsIgnoreCase(userRegistered.getTelecom())) {
+        if (Boolean.TRUE.equals(userRegistered.getIsKt())) { // ✅ isKt로 변경
             basePoint += 5000;
         }
 
@@ -142,4 +142,4 @@ public class Point {
         this.point -= amount;
     }
 }
-//>>> DDD / Aggregate Root
+// >>> DDD / Aggregate Root

@@ -15,76 +15,53 @@ import millie.domain.SubscriptionFailed;
 @Entity
 @Table(name = "Subscription_table")
 @Data
-//<<< DDD / Aggregate Root
+// <<< DDD / Aggregate Root
 public class Subscription {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
     private Boolean isSubscription;
-
     private Date rentalstart;
-
     private Date rentalend;
-
     private String webUrl;
-
     @Embedded
+    @AttributeOverride(name = "id", column = @Column(name = "book_id_id"))
     private BookId bookId;
 
     @Embedded
+    @AttributeOverride(name = "id", column = @Column(name = "user_id_id"))
     private UserId userId;
 
-    @PostPersist
-    public void onPostPersist() {
-        SubscriptionApplied subscriptionApplied = new SubscriptionApplied(this);
-        subscriptionApplied.publishAfterCommit();
-
-        SubscriptionFailed subscriptionFailed = new SubscriptionFailed(this);
-        subscriptionFailed.publishAfterCommit();
-    }
+    // @PostPersist
+    // public void onPostPersist() {
+    // SubscriptionApplied applied = new SubscriptionApplied(this);
+    // applied.publishAfterCommit();
+    // }
 
     public static SubscriptionRepository repository() {
         SubscriptionRepository subscriptionRepository = SubscriberApplication.applicationContext.getBean(
-            SubscriptionRepository.class
-        );
+                SubscriptionRepository.class);
         return subscriptionRepository;
     }
 
-    //<<< Clean Arch / Port Method
+    // <<< Clean Arch / Port Method
     public static void failSubscription(OutOfPoint outOfPoint) {
-        //implement business logic here:
+        if (outOfPoint.getUserId() == null || outOfPoint.getBookId() == null)
+            return;
 
-        /** Example 1:  new item 
-        Subscription subscription = new Subscription();
-        repository().save(subscription);
+        SubscriptionFailed subscriptionFailed = new SubscriptionFailed();
+        subscriptionFailed.setUserId(outOfPoint.getUserId());
+        subscriptionFailed.setBookId(outOfPoint.getBookId());
+        subscriptionFailed.setIsSubscription(false);
+        subscriptionFailed.setMessage("포인트 부족으로 대여 실패");
 
-        SubscriptionFailed subscriptionFailed = new SubscriptionFailed(subscription);
         subscriptionFailed.publishAfterCommit();
-        */
 
-        /** Example 2:  finding and process
-        
-        // if outOfPoint.userIdsubscriptionId exists, use it
-        
-        // ObjectMapper mapper = new ObjectMapper();
-        // Map<Long, Object> pointMap = mapper.convertValue(outOfPoint.getUserId(), Map.class);
-        // Map<Long, Object> pointMap = mapper.convertValue(outOfPoint.getSubscriptionId(), Map.class);
-
-        repository().findById(outOfPoint.get???()).ifPresent(subscription->{
-            
-            subscription // do something
-            repository().save(subscription);
-
-            SubscriptionFailed subscriptionFailed = new SubscriptionFailed(subscription);
-            subscriptionFailed.publishAfterCommit();
-
-         });
-        */
-
+        System.out.println(">>> [이벤트 발행] SubscriptionFailed: userId = "
+                + outOfPoint.getUserId() + ", bookId = " + outOfPoint.getBookId());
     }
-    //>>> Clean Arch / Port Method
+    // >>> Clean Arch / Port Method
 
 }
-//>>> DDD / Aggregate Root
+// >>> DDD / Aggregate Root
