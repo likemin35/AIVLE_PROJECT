@@ -13,15 +13,18 @@ public class AiController {
         this.aiClient = aiClient;
     }
 
+    
     @PostMapping("/summarize")
     public ResponseEntity<String> summarize(@RequestBody BookDto book) throws Exception {
-        String summary = aiClient.summarizeContent(book.getContent());
+        String summary = aiClient.summarizeContent(book.getContent(), book.getCategory());
         return ResponseEntity.ok(summary);
     }
 
     @PostMapping("/cover")
     public ResponseEntity<String> cover(@RequestBody BookDto book) throws Exception {
-        String imageUrl = aiClient.generateCover(book.getTitle(), book.getAuthorId());
+        String keywords = aiClient.extractKeywords(book.getContent());
+        String imageUrl = aiClient.generateCover(book.getTitle(), book.getCategory(), keywords);
+
         return ResponseEntity.ok(imageUrl);
     }
 
