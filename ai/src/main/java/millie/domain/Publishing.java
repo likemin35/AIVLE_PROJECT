@@ -21,14 +21,16 @@ public class Publishing {
     private String title;
     @Column
     private String authorId;
-    @Lob
-    @Column
+
+    @Column(length = 6000)
     private String content;
     @Column
     private String category;
     @Lob
     @Column
     private String image;
+    @Column(length=500)
+    private String keywords;
     @Lob
     @Column
     private String summaryContent;
