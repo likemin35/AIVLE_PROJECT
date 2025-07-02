@@ -7,34 +7,40 @@ import java.util.Objects;
 @Embeddable
 public class AuthorId implements Serializable {
 
-    private String id;
+    private Long id;
     private boolean isApprove;
 
     protected AuthorId() {
         this.id = null;
-        this.isApprove = true;  
+        this.isApprove = false;
     }
 
-    public AuthorId(String id) {
+    public AuthorId(Long id) {
         this.id = id;
-        this.isApprove = true;  
+        this.isApprove = false;
     }
 
-    public AuthorId(String id, boolean isApprove) {
+    public AuthorId(Long id, boolean isApprove) {
         this.id = id;
-        this.isApprove = isApprove;  
+        this.isApprove = isApprove;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
     public boolean isApprove() {
-        return isApprove;
+        return this.isApprove;
     }
 
-    public void setApprove(boolean isApprove) {
+    // ✅ setter 메서드 추가
+    public void setIsApprove(boolean isApprove) {
         this.isApprove = isApprove;
+    }
+
+    // ✅ 편의 메서드 추가
+    public boolean getIsApprove() {
+        return this.isApprove;
     }
 
     @Override
@@ -48,5 +54,13 @@ public class AuthorId implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(id, isApprove);
+    }
+
+    @Override
+    public String toString() {
+        return "AuthorId{" +
+                "id=" + id +
+                ", isApprove=" + isApprove +
+                '}';
     }
 }
