@@ -27,12 +27,16 @@ public class PublishingService {
             publishing.setWebUrl(event.getWebUrl() != null ? event.getWebUrl() : "https://millie.co.kr");
 
             // 수정된 aiClient 파라미터
-            String summary = aiClient.summarizeContent(event.getContent());
+            String summary = aiClient.summarizeContent(event.getContent(), publishing.getCategory());
             publishing.setSummaryContent(summary);
 
+            String keywords = aiClient.extractKeywords(summary);
+            publishing.setKeywords(keywords);
+
             String imageUrl = aiClient.generateCover(
-                    event.getTitle(),
-                    event.getAuthorId().toString()
+                event.getTitle(),
+                publishing.getCategory(),
+                keywords
             );
             publishing.setImage(imageUrl);
 
@@ -57,6 +61,7 @@ public class PublishingService {
             failed.setAuthorId(event.getAuthorId().toString());
             failed.setCategory(event.getCategory() != null ? event.getCategory() : "소설");
             failed.setSummaryContent("요약 실패");
+            failed.setKeywords("키워드 추출 실패");
             failed.setImage("이미지 생성 실패");
             failed.setCost(1000);
 
