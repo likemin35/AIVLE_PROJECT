@@ -37,17 +37,17 @@ public class WritingController {
         manuscript.setTitle(cmd.getTitle());
         manuscript.setContent(cmd.getContent());
 
-        // ✅ AuthorId 객체 생성 시 approve 포함
-        Boolean approve = cmd.getIsApprove(); // ✅ null-safe 체크
+    
+        Boolean approve = cmd.getIsApprove(); 
         manuscript.setAuthorId(new AuthorId(cmd.getAuthorId(), approve != null ? approve : false));
-        // 아래처럼 메서드 이름을 바꾸면 됩니다.
+        
         manuscript.setApprove(approve != null ? approve : true);  
     
 
         manuscript.setStatus(Status.WRITING);
         Manuscript saved = manuscriptRepository.save(manuscript);
 
-        return ResponseEntity.ok(saved.getBookId()); // bookId 리턴
+        return ResponseEntity.ok(saved.getBookId()); 
     }
 
     // 원고 수정
