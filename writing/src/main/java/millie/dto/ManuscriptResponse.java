@@ -16,7 +16,7 @@ public class ManuscriptResponse {
     private String title;
     private String content;
     private String status;
-    private String authorId;
+    private Long authorId;
     private boolean isApprove;
 
     public static ManuscriptResponse from(Manuscript manuscript) {

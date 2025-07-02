@@ -6,8 +6,10 @@ import millie.domain.ManuscriptRepository;
 import millie.domain.RequestPublishCommand;
 import millie.domain.RegisterManuscriptCommand;
 import millie.domain.AuthorId;
+import millie.domain.AuthorStatusRepository;
 import millie.domain.Status;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +19,8 @@ import java.util.List;
 @RequestMapping("/writing")  
 @RequiredArgsConstructor
 public class WritingController {
+
+    private AuthorStatusRepository authorStatusRepository;
 
     private final ManuscriptRepository manuscriptRepository;
 
@@ -34,7 +38,7 @@ public class WritingController {
         Manuscript manuscript = new Manuscript();
         manuscript.setTitle(cmd.getTitle());
         manuscript.setContent(cmd.getContent());
-        manuscript.setAuthorId(new AuthorId(cmd.getAuthorId()));
+        manuscript.setAuthorId(new AuthorId(Long.valueOf(cmd.getAuthorId())));
         manuscript.setStatus(Status.WRITING);
         manuscriptRepository.save(manuscript);
         return ResponseEntity.ok().build();
@@ -69,6 +73,14 @@ public class WritingController {
     @GetMapping
     public ResponseEntity<List<Manuscript>> getAllManuscripts() {
         List<Manuscript> manuscripts = manuscriptRepository.findAll();
+        for (Manuscript manuscript : manuscripts) {
+        AuthorId authorId = manuscript.getAuthorId();
+        if (authorId != null) {
+            authorStatusRepository.findById(authorId.getId()).ifPresent(status -> {
+                authorId.setIsApprove(status.getIsApprove());  // isApprove 값 주입
+            });
+        }
+    }
         return ResponseEntity.ok(manuscripts);
     }
 

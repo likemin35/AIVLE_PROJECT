@@ -1,13 +1,15 @@
 package millie.domain;
 
 import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+
 import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
 public class AuthorId implements Serializable {
 
-    private String id;
+    private Long id;
     private boolean isApprove;
 
     protected AuthorId() {
@@ -15,22 +17,22 @@ public class AuthorId implements Serializable {
         this.isApprove = false;
     }
 
-    public AuthorId(String id) {
+    public AuthorId(Long id) {
         this.id = id;
         this.isApprove = false;
     }
 
-    public AuthorId(String id, boolean isApprove) {
+    public AuthorId(Long id, boolean isApprove) {
         this.id = id;
         this.isApprove = isApprove;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
     public boolean isApprove() {
-        return isApprove;
+    return this.isApprove;
     }
 
     @Override
