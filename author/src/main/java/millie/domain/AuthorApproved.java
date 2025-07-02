@@ -11,6 +11,7 @@ import millie.infra.AbstractEvent;
 @ToString
 public class AuthorApproved extends AbstractEvent {
 
+    private Long authorId;
     private Boolean isApprove;
 
     public AuthorApproved(Author aggregate) {
