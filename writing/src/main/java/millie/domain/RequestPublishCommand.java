@@ -8,6 +8,7 @@ import lombok.Data;
 public class RequestPublishCommand {
 
     private String status;
+    private Boolean isApprove;
 
     public RequestPublishCommand() {}
 }
