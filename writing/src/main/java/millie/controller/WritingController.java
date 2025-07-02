@@ -14,8 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/writing")  
+@RequestMapping("/manuscripts")  // /writing에서 /manuscripts로 변경
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")  // CORS 추가
 public class WritingController {
 
     private final ManuscriptRepository manuscriptRepository;
@@ -25,7 +26,7 @@ public class WritingController {
     public ResponseEntity<?> requestPublish(@PathVariable("bookId") Long bookId, @RequestBody RequestPublishCommand cmd) {
         Manuscript manuscript = manuscriptRepository.findById(bookId)
             .orElseThrow(() -> new RuntimeException("원고를 찾을 수 없습니다."));
-        manuscript.requestPublish(cmd);  // isApprove 포함된 cmd 전달
+        manuscript.requestPublish(cmd);
         manuscriptRepository.save(manuscript);
         return ResponseEntity.ok().build();
     }
@@ -37,17 +38,13 @@ public class WritingController {
         manuscript.setTitle(cmd.getTitle());
         manuscript.setContent(cmd.getContent());
 
-    
         Boolean approve = cmd.getIsApprove(); 
         manuscript.setAuthorId(new AuthorId(cmd.getAuthorId(), approve != null ? approve : false));
-        
-        manuscript.setApprove(approve != null ? approve : true);  
-    
-
+        manuscript.setApprove(approve != null ? approve : true);
         manuscript.setStatus(Status.WRITING);
+        
         Manuscript saved = manuscriptRepository.save(manuscript);
-
-        return ResponseEntity.ok(saved.getBookId()); 
+        return ResponseEntity.ok(saved);
     }
 
     // 원고 수정
@@ -84,15 +81,5 @@ public class WritingController {
     public ResponseEntity<List<Manuscript>> getAllManuscripts() {
         List<Manuscript> manuscripts = manuscriptRepository.findAll();
         return ResponseEntity.ok(manuscripts);
-    }
-
-    // 제목 기반 검색
-    @GetMapping("/search")
-    public ResponseEntity<List<Manuscript>> getByTitle(@RequestParam String title) {
-        List<Manuscript> result = manuscriptRepository.findByTitle(title);
-        if (result.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(result);
     }
 }

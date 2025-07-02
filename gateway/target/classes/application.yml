@@ -7,37 +7,35 @@ spring:
   profiles: default
   cloud:
     gateway:
-#<<< API Gateway / Routes
       routes:
         - id: author
           uri: http://localhost:8082
           predicates:
-            - Path=/authors/**, 
+            - Path=/authors/**
         - id: writing
           uri: http://localhost:8083
           predicates:
-            - Path=/manuscripts/**, 
+            - Path=/manuscripts/**
         - id: point
           uri: http://localhost:8084
           predicates:
-            - Path=/points/**, /getPoints/**
+            - Path=/points/**
         - id: subscriber
           uri: http://localhost:8085
           predicates:
-            - Path=/users/**, /subscriptions/**, /getSubscriptions/**
+            - Path=/users/**, /subscriptions/**, /auth/**, /events/**
         - id: platform
           uri: http://localhost:8086
           predicates:
-            - Path=/books/**, /viewBooks/**
+            - Path=/books/**
         - id: ai
           uri: http://localhost:8087
           predicates:
-            - Path=/publishings/**, 
+            - Path=/publishings/**
         - id: frontend
-          uri: http://localhost:8080
+          uri: http://localhost:3000
           predicates:
             - Path=/**
-#>>> API Gateway / Routes
       globalcors:
         corsConfigurations:
           '[/**]':
@@ -49,7 +47,6 @@ spring:
               - "*"
             allowCredentials: true
 
-
 ---
 
 spring:
@@ -60,27 +57,27 @@ spring:
         - id: author
           uri: http://author:8080
           predicates:
-            - Path=/authors/**, 
+            - Path=/authors/**
         - id: writing
           uri: http://writing:8080
           predicates:
-            - Path=/manuscripts/**, 
+            - Path=/manuscripts/**
         - id: point
           uri: http://point:8080
           predicates:
-            - Path=/points/**, 
+            - Path=/points/**
         - id: subscriber
           uri: http://subscriber:8080
           predicates:
-            - Path=/users/**, /subscriptions/**, 
+            - Path=/users/**, /subscriptions/**, /auth/**, /events/**
         - id: platform
           uri: http://platform:8080
           predicates:
-            - Path=/books/**, 
+            - Path=/books/**
         - id: ai
           uri: http://ai:8080
           predicates:
-            - Path=/publishings/**, 
+            - Path=/publishings/**
         - id: frontend
           uri: http://frontend:8080
           predicates:
