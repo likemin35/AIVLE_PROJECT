@@ -12,17 +12,17 @@ public class AuthorId implements Serializable {
 
     protected AuthorId() {
         this.id = null;
-        this.isApprove = false;  // 기본값 false
+        this.isApprove = true;  
     }
 
     public AuthorId(String id) {
         this.id = id;
-        this.isApprove = false;  // 기본 생성자는 승인 안된 상태
+        this.isApprove = true;  
     }
 
     public AuthorId(String id, boolean isApprove) {
         this.id = id;
-        this.isApprove = isApprove;  // 승인 상태 지정 가능
+        this.isApprove = isApprove;  
     }
 
     public String getId() {
