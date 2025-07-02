@@ -35,7 +35,7 @@ public class WritingController {
         Manuscript manuscript = new Manuscript();
         manuscript.setTitle(cmd.getTitle());
         manuscript.setContent(cmd.getContent());
-        manuscript.setAuthorId(new AuthorId(cmd.getAuthorId()));
+        manuscript.setAuthorId(new AuthorId(cmd.getAuthorId(), cmd.getIsApprove() != null ? cmd.getIsApprove() : false));
         manuscript.setStatus(Status.WRITING);
         manuscriptRepository.save(manuscript);
         return ResponseEntity.ok().build();
