@@ -14,12 +14,10 @@ public class AuthorId implements Serializable {
 
     protected AuthorId() {
         this.id = null;
-        this.isApprove = false;
     }
 
     public AuthorId(Long id) {
         this.id = id;
-        this.isApprove = false;
     }
 
     public AuthorId(Long id, boolean isApprove) {
@@ -33,6 +31,10 @@ public class AuthorId implements Serializable {
 
     public boolean isApprove() {
     return this.isApprove;
+    }
+
+    public void setIsApprove(boolean isApprove) {
+        this.isApprove = isApprove;
     }
 
     @Override
