@@ -99,7 +99,6 @@ services:
     image: adoptopenjdk/maven-openjdk11:latest
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - OPENAI_API_KEY= Bearer sk-
     command: mvn spring-boot:run
     ports:
       - 8087:8087
