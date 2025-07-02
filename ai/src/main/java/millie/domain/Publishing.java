@@ -16,22 +16,34 @@ public class Publishing {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    
     private Long id;
-
     @Column
-    private String image;             // AI 생성 표지 이미지 URL
-    @Column
-    private String summaryContent;    // 요약 내용
-    private String bookName;          // 제목
-    private String pdfPath;           // PDF 경로
-    private String authorId;          // 저자 ID
-    private String webUrl;            // 웹 주소
-    private String category;          // 장르 (소설, 에세이 등)
-    @Column
-    private Integer cost;             // 가격 (연속형)
     private String title;
+    @Column
+    private String authorId;
+    @Lob
+    @Column
     private String content;
+    @Column
+    private String category;
+    @Lob
+    @Column
+    private String image;
+    @Lob
+    @Column
+    private String summaryContent;
+    @Column
+    private Integer cost;
+    @Column
+    private String aiStatus;
+    @Column
+    private String bookName;
+    @Column
+    private String pdfPath;
+    @Column
+    private String webUrl;
+
+
 
     @Embedded
     private ManuscriptId manuscriptId;
