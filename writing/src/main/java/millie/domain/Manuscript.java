@@ -32,6 +32,7 @@ public class Manuscript {
 
     @Embedded
     private AuthorId authorId;
+    private boolean isApprove;
 
     @PostPersist
     public void onPostPersist() {
