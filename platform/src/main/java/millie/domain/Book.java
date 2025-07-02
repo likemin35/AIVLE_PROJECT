@@ -83,14 +83,17 @@ public class Book {
                 // 대여 시 조회수 증가
                 book.setViewCount(book.getViewCount() + 1);
                 
+                System.out.println(">>> viewCount: " + book.getViewCount());
+                System.out.println(">>> isBestSeller: " + book.getIsBestSeller());
+                System.out.println(">>> isSubscription: " + subscriptionApplied.getIsSubscription());
                 // 베스트셀러 조건 확인 (조회수 30회 이상)
                 if (book.getViewCount() >= 30 && !book.getIsBestSeller()) {
                     book.setIsBestSeller(true);
                     
                     BadgeGranted badgeGranted = new BadgeGranted(book);
+                    System.out.println(">>> BadgeGranted 이벤트 발행 준비됨");
                     badgeGranted.publishAfterCommit();
                 }
-                
                 repository().save(book);
             }
         }
