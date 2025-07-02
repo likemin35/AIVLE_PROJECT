@@ -33,11 +33,13 @@ public class Subscription {
     @AttributeOverride(name = "id", column = @Column(name = "user_id_id"))
     private UserId userId;
 
-    // @PostPersist
-    // public void onPostPersist() {
-    // SubscriptionApplied applied = new SubscriptionApplied(this);
-    // applied.publishAfterCommit();
-    // }
+    @PostPersist
+    public void onPostPersist() {
+        System.out.println(">>> 이벤트 발행 전");
+        SubscriptionApplied applied = new SubscriptionApplied(this);
+        applied.publishAfterCommit();
+        System.out.println(">>> 이벤트 발행 후");
+    }      
 
     public static SubscriptionRepository repository() {
         SubscriptionRepository subscriptionRepository = SubscriberApplication.applicationContext.getBean(

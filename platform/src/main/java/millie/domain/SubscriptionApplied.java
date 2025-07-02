@@ -10,8 +10,8 @@ import millie.infra.AbstractEvent;
 public class SubscriptionApplied extends AbstractEvent {
 
     private Long id;
-    private Object bookId;
-    private Object userId;
+    private Long bookId;
+    private Long userId;
     private Boolean isSubscription;
     private Date startSubscription;
     private Date endSubscription;

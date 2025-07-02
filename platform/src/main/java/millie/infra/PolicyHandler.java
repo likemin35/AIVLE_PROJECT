@@ -55,5 +55,11 @@ public class PolicyHandler {
         // Sample Logic //
         Book.registerBook(event);
     }
+
+    @StreamListener(value = KafkaProcessor.INPUT)
+    public void debug(@Payload String message) {
+        System.out.println(">>> 받은 메시지: " + message);
+    }
+
 }
 //>>> Clean Arch / Inbound Adaptor
