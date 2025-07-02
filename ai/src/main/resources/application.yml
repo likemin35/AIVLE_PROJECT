@@ -7,7 +7,7 @@ spring:
 
 openai:
   api:
-    key: Bearer sk-
+    key: sk-xxxxxxxxxxxxxxx
     url: https://api.openai.com/v1/chat/completions
     image-url: https://api.openai.com/v1/images/generations
 
