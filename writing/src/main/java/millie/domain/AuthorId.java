@@ -1,8 +1,6 @@
 package millie.domain;
 
 import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -14,10 +12,12 @@ public class AuthorId implements Serializable {
 
     protected AuthorId() {
         this.id = null;
+        this.isApprove = false;
     }
 
     public AuthorId(Long id) {
         this.id = id;
+        this.isApprove = false;
     }
 
     public AuthorId(Long id, boolean isApprove) {
@@ -30,11 +30,17 @@ public class AuthorId implements Serializable {
     }
 
     public boolean isApprove() {
-    return this.isApprove;
+        return this.isApprove;
     }
 
+    // ✅ setter 메서드 추가
     public void setIsApprove(boolean isApprove) {
         this.isApprove = isApprove;
+    }
+
+    // ✅ 편의 메서드 추가
+    public boolean getIsApprove() {
+        return this.isApprove;
     }
 
     @Override
@@ -48,5 +54,13 @@ public class AuthorId implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(id, isApprove);
+    }
+
+    @Override
+    public String toString() {
+        return "AuthorId{" +
+                "id=" + id +
+                ", isApprove=" + isApprove +
+                '}';
     }
 }
