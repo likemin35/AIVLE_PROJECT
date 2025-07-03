@@ -6,8 +6,10 @@ import millie.domain.ManuscriptRepository;
 import millie.domain.RequestPublishCommand;
 import millie.domain.RegisterManuscriptCommand;
 import millie.domain.AuthorId;
+import millie.domain.AuthorStatusRepository;
 import millie.domain.Status;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,39 +20,30 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WritingController {
 
+    private AuthorStatusRepository authorStatusRepository;
+
     private final ManuscriptRepository manuscriptRepository;
 
-    // 출간 요청
     @PostMapping("/{bookId}/request-publish")
     public ResponseEntity<?> requestPublish(@PathVariable("bookId") Long bookId, @RequestBody RequestPublishCommand cmd) {
         Manuscript manuscript = manuscriptRepository.findById(bookId)
             .orElseThrow(() -> new RuntimeException("원고를 찾을 수 없습니다."));
-        manuscript.requestPublish(cmd);  // isApprove 포함된 cmd 전달
+        manuscript.requestPublish(cmd);
         manuscriptRepository.save(manuscript);
         return ResponseEntity.ok().build();
     }
 
-    // 원고 등록
     @PostMapping
     public ResponseEntity<?> register(@RequestBody RegisterManuscriptCommand cmd) {
         Manuscript manuscript = new Manuscript();
         manuscript.setTitle(cmd.getTitle());
         manuscript.setContent(cmd.getContent());
-
-    
-        Boolean approve = cmd.getIsApprove(); 
-        manuscript.setAuthorId(new AuthorId(cmd.getAuthorId(), approve != null ? approve : false));
-        
-        manuscript.setApprove(approve != null ? approve : true);  
-    
-
+        manuscript.setAuthorId(new AuthorId(Long.valueOf(cmd.getAuthorId())));
         manuscript.setStatus(Status.WRITING);
-        Manuscript saved = manuscriptRepository.save(manuscript);
-
-        return ResponseEntity.ok(saved.getBookId()); 
+        manuscriptRepository.save(manuscript);
+        return ResponseEntity.ok().build();
     }
-
-    // 원고 수정
+    
     @PutMapping("/{bookId}")
     public ResponseEntity<?> updateManuscript(@PathVariable("bookId") Long bookId, @RequestBody RegisterManuscriptCommand cmd) {
         Manuscript manuscript = manuscriptRepository.findById(bookId)
@@ -61,7 +54,6 @@ public class WritingController {
         return ResponseEntity.ok().build();
     }
 
-    // 단건 조회
     @GetMapping("/{bookId}")
     public ResponseEntity<Manuscript> getManuscript(@PathVariable("bookId") Long bookId) {
         Manuscript manuscript = manuscriptRepository.findById(bookId)
@@ -69,7 +61,6 @@ public class WritingController {
         return ResponseEntity.ok(manuscript);
     }
 
-    // 삭제
     @DeleteMapping("/{bookId}")
     public ResponseEntity<?> deleteManuscript(@PathVariable("bookId") Long bookId) {
         if (!manuscriptRepository.existsById(bookId)) {
@@ -79,14 +70,20 @@ public class WritingController {
         return ResponseEntity.ok().build();
     }
 
-    // 전체 목록 조회
     @GetMapping
     public ResponseEntity<List<Manuscript>> getAllManuscripts() {
         List<Manuscript> manuscripts = manuscriptRepository.findAll();
+        for (Manuscript manuscript : manuscripts) {
+        AuthorId authorId = manuscript.getAuthorId();
+        if (authorId != null) {
+            authorStatusRepository.findById(authorId.getId()).ifPresent(status -> {
+                authorId.setIsApprove(status.getIsApprove());  // isApprove 값 주입
+            });
+        }
+    }
         return ResponseEntity.ok(manuscripts);
     }
 
-    // 제목 기반 검색
     @GetMapping("/search")
     public ResponseEntity<List<Manuscript>> getByTitle(@RequestParam String title) {
         List<Manuscript> result = manuscriptRepository.findByTitle(title);

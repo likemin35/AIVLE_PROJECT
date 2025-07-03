@@ -16,9 +16,12 @@ spec:
     spec:
       containers:
         - name: author
-          image: "username/author:latest"
+          image: "likemin/purplebooks-author:latest"
           ports:
             - containerPort: 8080
+          env:                          
+            - name: SPRING_PROFILES_ACTIVE
+              value: docker
           readinessProbe:
             httpGet:
               path: '/actuator/health'

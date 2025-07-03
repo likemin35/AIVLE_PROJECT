@@ -7,5 +7,4 @@ public class RegisterManuscriptCommand {
     private String title;
     private String content;
     private String authorId;
-    private Boolean isApprove;
 }

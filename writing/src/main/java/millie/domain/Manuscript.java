@@ -32,7 +32,6 @@ public class Manuscript {
 
     @Embedded
     private AuthorId authorId;
-    private boolean isApprove;
 
     @PostPersist
     public void onPostPersist() {
@@ -58,24 +57,18 @@ public class Manuscript {
     //<<< Clean Arch / Port Method
     public void requestPublish(RequestPublishCommand requestPublishCommand) {
         System.out.println("📌 Request status: " + requestPublishCommand.getStatus());
-        System.out.println("📌 Request isApprove: " + requestPublishCommand.getIsApprove());
     
         try {
-            Status newStatus = Status.valueOf(requestPublishCommand.getStatus().toUpperCase());
+            Status newStatus = Status.valueOf(requestPublishCommand.getStatus().toUpperCase()); // ✅ 소문자 대응
             this.status = newStatus;
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("유효하지 않은 상태값입니다: " + requestPublishCommand.getStatus());
-        }
-    
-        if (requestPublishCommand.getIsApprove() != null) {
-            this.isApprove = requestPublishCommand.getIsApprove();
-        } else {
-            this.isApprove = true;  
+            throw new RuntimeException("유효하지 않은 상태값입니다: " + requestPublishCommand.getStatus()); // ✅ 에러 메시지 명확
         }
     
         PublishingRequested event = new PublishingRequested(this);
         event.publishAfterCommit();
     }
     //>>> Clean Arch / Port Method
+
 }
 //>>> DDD / Aggregate Root

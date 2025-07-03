@@ -8,6 +8,5 @@ import org.springframework.beans.BeanUtils;
 
 public enum Status {
     WRITING,
-    DONE,
-    PUBLISHED,
+    DONE
 }
