@@ -24,10 +24,11 @@ public class PublishingController {
         Publishing saved = publishingRepository.save(publishing);
 
         // 2. AI 를 통해 후처리
-        String summary = aiClient.summarizeContent(saved.getContent());
-        String image = aiClient.generateCover(saved.getTitle(), String.valueOf(saved.getAuthorId()));
+        String summary = aiClient.summarizeContent(saved.getContent(), saved.getCategory());
+
+        String image = aiClient.generateCover(saved.getTitle(),saved.getContent(), saved.getCategory());
         int cost = aiClient.predictBookPrice(
-            saved.getTitle(),
+            saved.getContent(),
             saved.getCategory(),
             false,
             0,
