@@ -30,13 +30,10 @@ public class PublishingService {
             String summary = aiClient.summarizeContent(event.getContent(), publishing.getCategory());
             publishing.setSummaryContent(summary);
 
-            String keywords = aiClient.extractKeywords(summary);
-            publishing.setKeywords(keywords);
-
             String imageUrl = aiClient.generateCover(
                 event.getTitle(),
-                publishing.getCategory(),
-                keywords
+                event.getContent(),
+                publishing.getCategory()
             );
             publishing.setImage(imageUrl);
 
@@ -61,7 +58,6 @@ public class PublishingService {
             failed.setAuthorId(event.getAuthorId().toString());
             failed.setCategory(event.getCategory() != null ? event.getCategory() : "소설");
             failed.setSummaryContent("요약 실패");
-            failed.setKeywords("키워드 추출 실패");
             failed.setImage("이미지 생성 실패");
             failed.setCost(1000);
 
