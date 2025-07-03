@@ -29,10 +29,8 @@ public class Publishing {
     @Lob
     @Column
     private String image;
-    @Column(length=500)
-    private String keywords;
     @Lob
-    @Column
+    @Column(length=700)
     private String summaryContent;
     @Column
     private Integer cost;

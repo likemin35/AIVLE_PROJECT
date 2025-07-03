@@ -7,7 +7,6 @@ public class BookDto {
     private String category;
     private boolean isBestSeller;
     private int viewCount;
-    private String keywords;
 
     // Getter / Setter
     public String getTitle() { return title; }

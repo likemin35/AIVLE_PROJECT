@@ -1,49 +1,45 @@
 package millie.infra;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.naming.NameParser;
+import javax.naming.NameParser;
 import javax.transaction.Transactional;
-
+import millie.config.kafka.KafkaProcessor;
 import millie.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.stereotype.Service;
 
-@RestController
-@RequestMapping("/publish")
+//<<< Clean Arch / Inbound Adaptor
+@Service
 @Transactional
-public class PublishingController {
+public class PolicyHandler {
 
     @Autowired
     PublishingRepository publishingRepository;
 
     @Autowired
-    AiClient aiClient;
+    PublishingService publishingService;
 
-    @PostMapping
-    public Publishing createPublishing(@RequestBody Publishing publishing) throws Exception {
-        System.out.println(">>> POST /publish called");
-        // 1. 먼저 기본 정보 저장
-        Publishing saved = publishingRepository.save(publishing);
+    @StreamListener(KafkaProcessor.INPUT)
+    public void whatever(@Payload String eventString) {}
 
-        // 2. AI 를 통해 후처리
-        String summary = aiClient.summarizeContent(saved.getContent(), saved.getCategory());
-
-        String keywords = aiClient.extractKeywords(summary);
-        
-        String image = aiClient.generateCover(saved.getTitle(), saved.getCategory(), keywords);
-        int cost = aiClient.predictBookPrice(
-            saved.getTitle(),
-            saved.getCategory(),
-            false,
-            0,
-            saved.getContent()
+    @StreamListener(
+        value = KafkaProcessor.INPUT,
+        condition = "headers['type']=='PublishingRequested'"
+    )
+    public void wheneverPublishingRequested_Publish(
+        @Payload PublishingRequested publishingRequested
+    ) {
+        PublishingRequested event = publishingRequested;
+        System.out.println(
+            "\n\n##### listener Publish : " + publishingRequested + "\n\n"
         );
 
-        
-        saved.setSummaryContent(summary);
-        saved.setKeywords(keywords);
-        saved.setImage(image);
-        saved.setCost(cost);
-
-        
-        return publishingRepository.save(saved);
+        // Sample Logic //
+        publishingService.publish(event);
     }
 }
+//>>> Clean Arch / Inbound Adaptor
