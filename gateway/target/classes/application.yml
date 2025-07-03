@@ -31,21 +31,25 @@ spring:
         - id: ai
           uri: http://localhost:8087
           predicates:
-            - Path=/publishings/**
-        # - id: frontend
-        #   uri: http://localhost:3000
-        #   predicates:
-        #     - Path=/**
+            - Path=/publishings/**, /ai/**
+
+        # ✅ 프론트엔드 라우팅 주석 해제 (루트 경로 포함)
+        - id: frontend
+          uri: http://localhost:3000
+          predicates:
+            - Path=/**
+
       globalcors:
         corsConfigurations:
           '[/**]':
-            allowedOrigins:
+            allowedOriginPatterns:
               - "*"
             allowedMethods:
               - "*"
             allowedHeaders:
               - "*"
             allowCredentials: true
+            maxAge: 3600
 
 ---
 
@@ -77,21 +81,23 @@ spring:
         - id: ai
           uri: http://ai:8080
           predicates:
-            - Path=/publishings/**
+            - Path=/publishings/**, /ai/**
         - id: frontend
           uri: http://frontend:8080
           predicates:
             - Path=/**
+
       globalcors:
         corsConfigurations:
           '[/**]':
-            allowedOrigins:
+            allowedOriginPatterns:
               - "*"
             allowedMethods:
               - "*"
             allowedHeaders:
               - "*"
             allowCredentials: true
+            maxAge: 3600
 
 server:
   port: 8080

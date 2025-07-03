@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 //<<< Clean Arch / Inbound Adaptor
 
 @RestController
-// @RequestMapping(value="/authors")
+@CrossOrigin(origins = "*") // CORS 설정 추가
 @Transactional
 public class AuthorController {
 
