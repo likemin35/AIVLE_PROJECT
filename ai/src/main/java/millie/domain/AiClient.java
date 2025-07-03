@@ -2,15 +2,29 @@ package millie.domain;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import okhttp3.*;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.MediaType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import java.time.Duration;
+
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class AiClient {
 
-    private final OkHttpClient client = new OkHttpClient();
+    OkHttpClient client = new OkHttpClient.Builder()
+        .callTimeout(Duration.ofMinutes(60))         // 전체 호출 제한 60분
+        .connectTimeout(Duration.ofSeconds(30))      // 연결 자체는 30초
+        .readTimeout(Duration.ofMinutes(60))         // 응답 수신 60분
+        .writeTimeout(Duration.ofMinutes(60))        // 요청 전송 60분
+        .build();
     private final ObjectMapper mapper = new ObjectMapper();
-    
+
     @Value("${openai.api.key}")
     private String openaiApiKey;
 
@@ -20,157 +34,205 @@ public class AiClient {
     @Value("${openai.api.image-url}")
     private String openaiImageUrl;
 
-    public String summarizeContent(String content) throws Exception {
-        String prompt = String.format("""
-    다음은 책의 본문과 메타 정보를 포함하는 요청입니다:
-    - 책 제목: %s
-    - 저자 ID: %s
-    - 출판 요청 ID: %s
-    - 원고 ID: %s
-    - 발행 비용: %s
-    - 카테고리: %s
-    - 기타 변수: %s
+    /**
+     * 1) 요약
+     */
+    public String summarizeContent(String content, String category) throws Exception {
+        String rules = 
+        "Please follow these summarization rules based on the book category:\n\n"
+        + "Children's books: Summarize using very simple words and sentences so children can understand easily. Highlight emotions and moral lessons.\n"
+        + "Novels: Summarize in easy-to-understand and immersive language for readers in their teens to 40s. Focus on the main characters and the storyline.\n"
+        + "Essays: Summarize in a natural, comfortable tone so readers in their 20s to 50s can relate. Deliver the author's core message and thoughts clearly.\n"
+        + "Study books: Summarize using clear language that students and general readers can easily understand. Emphasize key concepts and important points.\n"
+        + "Self-help: Summarize with a motivational and actionable tone for readers in their 20s to 40s, focusing on practical advice and inspiring messages.\n"
+        + "Comics: Summarize in a fun and lively style that appeals to children and teenagers, highlighting the main storyline and entertaining elements.\n\n"
+        + "---\n\n";
 
-    본문 내용:
-    %s
-
-    위 정보를 바탕으로 아래 두 가지를 수행해주세요:
-    1. 전체 줄거리를 핵심 포인트 위주로 500자 내외로 요약해주세요.
-    2. 주요 변수(책 제목, 저자 ID, 원고 ID, 카테고리, 비용 등)를 바탕으로 메타 정보가 잘 표현된 요약도 포함해주세요.
-    """,
-         event.getTitle(),
-         event.getAuthorId(),
-         event.getId(),
-         event.getManuscriptId(),
-         event.getCost(),
-         event.getCategory(),
-         /* 기타 변수: 예시로 event.getWebUrl() 등 */ event.getWebUrl(),
-         event.getContent()
-);
-
-        RequestBody body = RequestBody.create(mapper.writeValueAsString(Map.of(
-            "model", "gpt-4",
-            "messages", List.of(Map.of("role", "user", "content", prompt))
-        )), MediaType.parse("application/json"));
+        String prompt = rules
+        + "Book category: " + category + "\n"
+        + "Please summarize the following book content in 300 to 900 characters. "
+        + "Do not leave out important details, and make sure to include the main flow, key characters, emotions, and messages clearly.\n\n"
+        + content;
+        RequestBody body = RequestBody.create(
+                mapper.writeValueAsString(Map.of(
+                        "model", "gpt-4o-mini",
+                        "messages", List.of(
+                                Map.of("role", "system", "content", "You are a helpful summarizer."),
+                                Map.of("role", "user", "content", prompt)
+                        )
+                )),
+                MediaType.parse("application/json")
+        );
 
         Request request = new Request.Builder()
-            .url("https://api.openai.com/v1/chat/completions")
-            .addHeader("Authorization", "Bearer " + OPENAI_API_KEY)
-            .post(body)
-            .build();
+                .url(openaiApiUrl)
+                .addHeader("Authorization", "Bearer " + openaiApiKey)
+                .post(body)
+                .build();
 
         try (Response response = client.newCall(request).execute()) {
-            JsonNode root = mapper.readTree(response.body().string());
-            return root.get("choices").get(0).get("message").get("content").asText();
+            String raw = response.body().string();
+            System.out.println("OpenAI 응답: " + raw);
+
+            JsonNode root = mapper.readTree(raw);
+            JsonNode choices = root.get("choices");
+            if (choices != null && choices.isArray() && choices.size() > 0) {
+                JsonNode contentNode = choices.get(0).get("message").get("content");
+                if (contentNode != null) {
+                    return contentNode.asText();
+                }
+            }
+            throw new RuntimeException("summarizeContent() OpenAI 응답구조가 예상과 다릅니다: " + raw);
         }
     }
 
-    public String generateCover(String summary, String title, String genre) throws Exception {
-        String imagePrompt = String.format("""
-당신은 예술적인 책 표지 디자이너입니다.
-다음은 책에 대한 메타정보입니다:
-- 제목: %s
-- 저자 ID: %s
-- 원고 ID: %s
-- 발행 요청 ID: %s
-- 카테고리: %s
-- 예상 발행 비용: %s
-- 변수들: %s
+    /**
+     * 2) 표지 생성
+     */
+    public String generateCover(String title, String content, String category) throws Exception {
+        String promptStyle;
+        switch (category.toLowerCase()) {
+                case "소설":
+                promptStyle = "emotional, cinematic, painterly style";
+                break;
+                case "동화":
+                promptStyle = "friendly, colorful, soft illustration";
+                break;
+                case "에세이":
+                promptStyle = "minimalist, calm, elegant";
+                break;
+                case "자기계발서":
+                promptStyle = "motivational, bright, inspiring";
+                break;
+                case "학습서":
+                promptStyle = "clean, professional, trustworthy";
+                break;
+                case "만화":
+                promptStyle = "dynamic, character-centered, vibrant";
+                break;
+                default:
+                promptStyle = "modern, creative, no text";
+        }
 
-줄거리 요약:
-%s
+        // 1000자 제한을 고려해 content는 300자 정도만 잘라주자
+        String shortContent = content.substring(0, Math.min(300, content.length()));
 
-위 내용을 바탕으로 다음 스타일로 표지를 만들어주세요:
-- 스타일: 동양화, 수묵 느낌
-- 분위기: 몽환적, 잔잔함
-- 컬러톤: 파스텔 톤 + 은은한 검정 계열
-- 요소: 연꽃, 물결, 구름 등 소설 분위기와 어울리는 심볼
-- 텍스트 영역: 제목 위주로 강조, 저자 ID 및 원고 ID는 부제처럼 작게 디자인
-""",
-         event.getTitle(),
-         event.getAuthorId(),
-         event.getManuscriptId(),
-         event.getId(),
-         event.getCategory(),
-         event.getCost(),
-         event.getWebUrl() != null ? event.getWebUrl() : "",
-         summary,
-);
+        String imagePrompt = String.format(
+        "Book cover for \"%s\" about %s. %s. Focus on mood, symbols, no letters. This image will be used as a book cover thumbnail.",
+        title,
+        shortContent,
+        promptStyle
+        );
 
-
-        RequestBody body = RequestBody.create(mapper.writeValueAsString(Map.of(
-            "prompt", imagePrompt,
-            "n", 1,
-            "size", "512x768"
-        )), MediaType.parse("application/json"));
+        RequestBody body = RequestBody.create(
+                mapper.writeValueAsString(Map.of(
+                        "prompt", imagePrompt,
+                        "n", 1,
+                        "size", "1024x1024"
+                )),
+                MediaType.parse("application/json")
+        );
 
         Request request = new Request.Builder()
-            .url("https://api.openai.com/v1/images/generations")
-            .addHeader("Authorization", "Bearer " + OPENAI_API_KEY)
-            .post(body)
-            .build();
+                .url(openaiImageUrl)
+                .addHeader("Authorization", "Bearer " + openaiApiKey)
+                .post(body)
+                .build();
 
         try (Response response = client.newCall(request).execute()) {
-            JsonNode root = mapper.readTree(response.body().string());
-            return root.get("data").get(0).get("url").asText();
+            String raw = response.body().string();
+            System.out.println("OpenAI 이미지 응답: " + raw);
+
+            JsonNode root = mapper.readTree(raw);
+            JsonNode data = root.get("data");
+            if (data != null && data.isArray() && data.size() > 0) {
+                JsonNode urlNode = data.get(0).get("url");
+                if (urlNode != null) {
+                    return urlNode.asText();
+                }
+            }
+            throw new RuntimeException("generateCover() OpenAI 응답구조가 예상과 다릅니다: " + raw);
         }
     }
-}
 
+    /**
+     * 3) 가격 측정
+     */
+    public int predictBookPrice(String title, String category, boolean isBestSeller, int viewCount, String content) throws Exception {
+        String prompt = String.format(
+                "You are a professional book pricing evaluation AI.\n\n"
+                        + "Title: %s\n"
+                        + "Category: %s\n"
+                        + "Bestseller: %s\n"
+                        + "View count: %d\n"
+                        + "Content excerpt: %s\n\n"
+                        + "Based on these factors, please recommend a reasonable sales price (numbers only, in units of 1,000 KRW, between 1,000 and 100,000).",
+                title, category, isBestSeller, viewCount,
+                content.substring(0, Math.min(1000, content.length()))
+        );
 
-public int predictBookPrice(String title, String summary, String category, String content) throws Exception {
-    String prompt = String.format("""
-당신은 전문 책 평가 AI입니다.
+        RequestBody body = RequestBody.create(
+                mapper.writeValueAsString(Map.of(
+                        "model", "gpt-4o-mini",
+                        "messages", List.of(Map.of("role", "user", "content", prompt))
+                )),
+                MediaType.parse("application/json")
+        );
 
-다음 책에 대해 다음과 같은 요소들을 종합적으로 평가해 가격을 책정하세요:
+        Request request = new Request.Builder()
+                .url(openaiApiUrl)
+                .addHeader("Authorization", "Bearer " + openaiApiKey)
+                .post(body)
+                .build();
 
-- 내용의 전문성/깊이
-- 문장 구성과 전달력
-- 감성적/창의적 요소
-- 대중성 또는 틈새시장 가치
-- 길이 및 구성의 완성도
-- 독자에게 줄 수 있는 통찰력
-- 시장에서 팔릴 수 있는 기대감
+        try (Response response = client.newCall(request).execute()) {
+            String raw = response.body().string();
+            System.out.println("OpenAI 가격 응답: " + raw);
 
-[책 정보]
-제목: %s
-카테고리: %s
-요약: %s
-본문 일부: %s
+            JsonNode root = mapper.readTree(raw);
+            JsonNode choices = root.get("choices");
+            if (choices != null && choices.isArray() && choices.size() > 0) {
+                JsonNode contentNode = choices.get(0).get("message").get("content");
+                if (contentNode != null) {
+                    String result = contentNode.asText().trim();
+                    int rawPrice = Integer.parseInt(result.replaceAll("[^\\d]", ""));
+                    int rounded = (rawPrice / 1000) * 1000;
+                    return Math.max(1000, Math.min(100000, rounded));
+                }
+            }
+            throw new RuntimeException("predictBookPrice() OpenAI 응답구조가 예상과 다릅니다: " + raw);
+        }
+    }
 
-📌 규칙:
-1. 당신은 단 하나의 숫자만 대답합니다.
-2. 가격은 **1,000원 단위 정수**로 (예: 12000, 27000, 99000 등) 응답합니다.
-3. **최소 1,000원 ~ 최대 100,000원** 범위 내에서 응답하세요.
-4. '원' 등의 단위는 쓰지 말고 숫자만 출력하세요.
+    /**
+     * 4) 한 번에 enrich
+     */
+    public Publishing enrichPublishing(Publishing publishing) throws Exception {
+        // 1. 요약
+        String summary = summarizeContent(publishing.getContent(), publishing.getCategory());
+        publishing.setSummaryContent(summary);
 
-정답:
-""", title, category, summary, content.substring(0, Math.min(1000, content.length())));
+        // 2. 이미지
+        String imageUrl = generateCover(
+                publishing.getTitle(),
+                publishing.getContent(),
+                publishing.getCategory()
+        );
+        publishing.setImage(imageUrl);
 
-    RequestBody body = RequestBody.create(
-        mapper.writeValueAsString(Map.of(
-            "model", "gpt-4",
-            "messages", List.of(Map.of("role", "user", "content", prompt))
-        )),
-        MediaType.parse("application/json")
-    );
+        // 3. 가격
+        int cost = predictBookPrice(
+                publishing.getTitle(),
+                publishing.getCategory(),
+                false, // isBestSeller
+                0,     // viewCount
+                publishing.getContent()
+        );
+        publishing.setCost(cost);
 
-    Request request = new Request.Builder()
-        .url("https://api.openai.com/v1/chat/completions")
-        .addHeader("Authorization", "Bearer " + OPENAI_API_KEY)
-        .post(body)
-        .build();
+        // 상태
+        publishing.setAiStatus("COMPLETED");
 
-    try (Response response = client.newCall(request).execute()) {
-        JsonNode root = mapper.readTree(response.body().string());
-        String result = root.get("choices").get(0).get("message").get("content").asText().trim();
-
-        // 숫자만 추출 후 보정
-        int rawPrice = Integer.parseInt(result.replaceAll("[^\\d]", ""));
-        int rounded = (rawPrice / 1000) * 1000;
-
-        // 1,000 ~ 100,000 제한 적용
-        return Math.max(1000, Math.min(100000, rounded));
+        return publishing;
     }
 }
-
