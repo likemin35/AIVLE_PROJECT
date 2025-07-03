@@ -33,13 +33,14 @@ spring:
           predicates:
             - Path=/publishings/**, /ai/**
 
-        # ✅ 프론트엔드 라우팅 주석 해제 (루트 경로 포함)
+        # ✅ 프론트엔드 라우팅
         - id: frontend
           uri: http://localhost:3000
           predicates:
             - Path=/**
 
       globalcors:
+        add-to-simple-url-handler-mapping: true  # ✅ 추가된 부분
         corsConfigurations:
           '[/**]':
             allowedOriginPatterns:
@@ -88,6 +89,7 @@ spring:
             - Path=/**
 
       globalcors:
+        add-to-simple-url-handler-mapping: true  # ✅ 추가된 부분
         corsConfigurations:
           '[/**]':
             allowedOriginPatterns:
