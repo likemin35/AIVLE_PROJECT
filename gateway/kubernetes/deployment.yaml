@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: gateway
-          image: "likemin/purplebooks-gateway:latest"
+          image: "purplebooks.azurecr.io/gateway:250703"
           ports:
             - containerPort: 8080
