@@ -13,13 +13,14 @@ spec:
     metadata:
       labels:
         app: author
+        sidecar.istio.io/inject: "true"
     spec:
       containers:
         - name: author
-          image: "likemin/purplebooks-author:latest"
+          image: "purplebooks.azurecr.io/author:250703"
           ports:
             - containerPort: 8080
-          env:                          
+          env:
             - name: SPRING_PROFILES_ACTIVE
               value: docker
           readinessProbe:

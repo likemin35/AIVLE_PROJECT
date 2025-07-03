@@ -1,14 +1,14 @@
 server:
   port: 8084
   error:
-    include-message: always  # 예외 메시지를 HTTP 응답에 포함
+    include-message: always 
 
 spring:
   application:
     name: point
 
   datasource:
-    url: jdbc:h2:file:./data/pointdb  # 파일 기반 H2 DB
+    url: jdbc:h2:file:./data/pointdb 
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -47,8 +47,7 @@ spring:
           contentType: application/json
       kafka:
         binder:
-          brokers: localhost:9092  # ✅ 이게 Kafka 주소 설정임
-
+          brokers: my-kafka:9092
 logging:
   level:
     org.hibernate.type: trace

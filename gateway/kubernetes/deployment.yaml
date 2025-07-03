@@ -13,9 +13,10 @@ spec:
     metadata:
       labels:
         app: gateway
+        sidecar.istio.io/inject: "true"
     spec:
       containers:
         - name: gateway
-          image: username/gateway:latest
+          image: "purplebooks.azurecr.io/gateway:250703"
           ports:
             - containerPort: 8080
