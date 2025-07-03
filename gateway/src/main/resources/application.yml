@@ -1,6 +1,14 @@
 server:
   port: 8088
 
+spring:
+  web:
+    cors:
+      allowed-origins: "*"
+      allowed-methods: "*"
+      allowed-headers: "*"
+      allow-credentials: true
+
 ---
 
 spring:
@@ -33,14 +41,14 @@ spring:
           predicates:
             - Path=/publishings/**, /ai/**
 
-        # ✅ 프론트엔드 라우팅
+        # ✅ React 앱 정적 파일 서빙 라우팅 추가
         - id: frontend
-          uri: http://localhost:3000
+          uri: forward:/index.html
           predicates:
-            - Path=/**
+            - Path=/
 
       globalcors:
-        add-to-simple-url-handler-mapping: true  # ✅ 추가된 부분
+        add-to-simple-url-handler-mapping: true
         corsConfigurations:
           '[/**]':
             allowedOriginPatterns:
@@ -83,13 +91,15 @@ spring:
           uri: http://ai:8080
           predicates:
             - Path=/publishings/**, /ai/**
+
+        # ✅ Docker 환경에서도 프론트 라우팅 추가
         - id: frontend
-          uri: http://frontend:8080
+          uri: forward:/index.html
           predicates:
-            - Path=/**
+            - Path=/
 
       globalcors:
-        add-to-simple-url-handler-mapping: true  # ✅ 추가된 부분
+        add-to-simple-url-handler-mapping: true
         corsConfigurations:
           '[/**]':
             allowedOriginPatterns:
