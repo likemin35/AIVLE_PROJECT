@@ -118,10 +118,10 @@ public class AiClient {
         String shortContent = content.substring(0, Math.min(300, content.length()));
 
         String imagePrompt = String.format(
-                "Book cover for \"%s\" about %s. %s. Focus on mood, symbols, no letters.",
-                title,
-                shortContent,
-                promptStyle
+        "Book cover for \"%s\" about %s. %s. Focus on mood, symbols, no letters. This image will be used as a book cover thumbnail.",
+        title,
+        shortContent,
+        promptStyle
         );
 
         RequestBody body = RequestBody.create(
