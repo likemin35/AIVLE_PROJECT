@@ -15,7 +15,7 @@
         @Autowired
         KafkaProcessor kafkaProcessor;
 
-        @PostMapping("/events")
+        @PostMapping("/events/ㅅㄷㄴㅅ")
         public void receiveEventFromPostman(@RequestBody Map<String, Object> event) {
             try {
                 ObjectMapper mapper = new ObjectMapper();

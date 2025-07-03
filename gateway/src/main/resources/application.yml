@@ -31,7 +31,7 @@ spring:
         - id: ai
           uri: http://localhost:8087
           predicates:
-            - Path=/publishings/**
+            - Path=/publishings/**, /ai/**
         - id: frontend
           uri: http://localhost:3000
           predicates:
@@ -39,13 +39,14 @@ spring:
       globalcors:
         corsConfigurations:
           '[/**]':
-            allowedOrigins:
+            allowedOriginPatterns:
               - "*"
             allowedMethods:
               - "*"
             allowedHeaders:
               - "*"
             allowCredentials: true
+            maxAge: 3600
 
 ---
 
@@ -77,7 +78,7 @@ spring:
         - id: ai
           uri: http://ai:8080
           predicates:
-            - Path=/publishings/**
+            - Path=/publishings/**, /ai/**
         - id: frontend
           uri: http://frontend:8080
           predicates:
@@ -85,7 +86,7 @@ spring:
       globalcors:
         corsConfigurations:
           '[/**]':
-            allowedOrigins:
+            allowedOriginPatterns:
               - "*"
             allowedMethods:
               - "*"

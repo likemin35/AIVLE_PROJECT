@@ -32,10 +32,10 @@ spring:
           uri: http://localhost:8087
           predicates:
             - Path=/publishings/**
-        - id: frontend
-          uri: http://localhost:3000
-          predicates:
-            - Path=/**
+        # - id: frontend
+        #   uri: http://localhost:3000
+        #   predicates:
+        #     - Path=/**
       globalcors:
         corsConfigurations:
           '[/**]':
