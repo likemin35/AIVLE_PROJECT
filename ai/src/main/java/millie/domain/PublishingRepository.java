@@ -1,22 +1,13 @@
 package millie.domain;
 
-import java.util.*;
-import lombok.*;
 import millie.domain.*;
-import millie.infra.AbstractEvent;
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
-public class PublishingRequested extends AbstractEvent {
-
-    private Long id;
-    private String title;
-    private Object authorId;
-    private Object status;
-    private String content;
-
-    private String category;
-    private String webUrl;
-}
+//<<< PoEAA / Repository
+@RepositoryRestResource(
+    collectionResourceRel = "publishings",
+    path = "publishings"
+)
+public interface PublishingRepository
+    extends PagingAndSortingRepository<Publishing, Long> {}
