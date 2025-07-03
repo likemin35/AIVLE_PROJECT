@@ -6,10 +6,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+
 
 @SpringBootApplication
 @EnableBinding(KafkaProcessor.class)
 @EnableFeignClients
+@EnableJpaRepositories(basePackages = "millie.domain")
 public class PointApplication {
 
     public static ApplicationContext applicationContext;
