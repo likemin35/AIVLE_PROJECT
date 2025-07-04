@@ -96,7 +96,7 @@ public String generateCover(String title, String content) throws Exception {
     // 2) 프롬프트 구성
     String imagePrompt = String.format(
         "%s. Theme: \"%s\". No text inside. Focus on illustration, mood, details, symbols.",
-        summarized.replaceAll("[^\\w\\s,]", ""),
+        summarized,
         title
     );
 
@@ -144,9 +144,12 @@ public String summarizeContent_1(String content) throws Exception {
                 Map.of(
                     "role", "system",
                     "content",
-                        "너는 이미지 생성 AI에게 줄 키워드 프롬프트 생성 도우미야. "
-                    + "책 내용을 보고 theme, style, colors, composition, mood, details 를 반드시 영어 단어(키워드)로만, 쉼표(,)로 나열해줘. 문장은 쓰지 마. 1000자 이내."
-
+                    "You are a helper summarizing prompts for DALL·E. "
+                    + "Please summarize the user's book description in no more than 500 characters, "
+                    + "and respond ONLY as a comma-separated list of concise English keywords, "
+                    + "including these elements: "
+                    + "1) Theme, 2) Style, 3) Colors, 4) Composition, 5) Mood/Emotion, "
+                    + "6) Details like props, background, or lighting. "
                 ),
                 Map.of("role", "user", "content", content)
             )
