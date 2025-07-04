@@ -86,74 +86,96 @@ public class AiClient {
         }
     }
 
-    /**
-     * 2) 표지 생성
-     */
-    public String generateCover(String title, String content, String category) throws Exception {
-        String promptStyle;
-        switch (category.toLowerCase()) {
-                case "소설":
-                promptStyle = "emotional, cinematic, painterly style";
-                break;
-                case "동화":
-                promptStyle = "friendly, colorful, soft illustration";
-                break;
-                case "에세이":
-                promptStyle = "minimalist, calm, elegant";
-                break;
-                case "자기계발서":
-                promptStyle = "motivational, bright, inspiring";
-                break;
-                case "학습서":
-                promptStyle = "clean, professional, trustworthy";
-                break;
-                case "만화":
-                promptStyle = "dynamic, character-centered, vibrant";
-                break;
-                default:
-                promptStyle = "modern, creative, no text";
-        }
+/**
+ * 표지 이미지 생성 (요약 포함)
+ */
+public String generateCover(String title, String content) throws Exception {
+    // 1) content 요약 (GPT에게)
+    String summarized = summarizeContent_1(content);
 
-        // 1000자 제한을 고려해 content는 300자 정도만 잘라주자
-        String shortContent = content.substring(0, Math.min(300, content.length()));
+    // 2) 프롬프트 구성
+    String imagePrompt = String.format(
+        "%s. Theme: \"%s\". No text inside. Focus on illustration, mood, details, symbols.",
+        summarized.replaceAll("[^\\w\\s,]", ""),
+        title
+    );
 
-        String imagePrompt = String.format(
-        "Book cover for \"%s\" about %s. %s. Focus on mood, symbols, no letters. This image will be used as a book cover thumbnail.",
-        title,
-        shortContent,
-        promptStyle
-        );
+    // 3) 이미지 요청
+    RequestBody body = RequestBody.create(
+        mapper.writeValueAsString(Map.of(
+            "prompt", imagePrompt,
+            "n", 1,
+            "size", "1024x1024"
+        )),
+        MediaType.parse("application/json")
+    );
 
-        RequestBody body = RequestBody.create(
-                mapper.writeValueAsString(Map.of(
-                        "prompt", imagePrompt,
-                        "n", 1,
-                        "size", "1024x1024"
-                )),
-                MediaType.parse("application/json")
-        );
+    Request request = new Request.Builder()
+        .url(openaiImageUrl)
+        .addHeader("Authorization", "Bearer " + openaiApiKey)
+        .post(body)
+        .build();
 
-        Request request = new Request.Builder()
-                .url(openaiImageUrl)
-                .addHeader("Authorization", "Bearer " + openaiApiKey)
-                .post(body)
-                .build();
+    try (Response response = client.newCall(request).execute()) {
+        String raw = response.body().string();
+        System.out.println("OpenAI 이미지 응답: " + raw);
 
-        try (Response response = client.newCall(request).execute()) {
-            String raw = response.body().string();
-            System.out.println("OpenAI 이미지 응답: " + raw);
-
-            JsonNode root = mapper.readTree(raw);
-            JsonNode data = root.get("data");
-            if (data != null && data.isArray() && data.size() > 0) {
-                JsonNode urlNode = data.get(0).get("url");
-                if (urlNode != null) {
-                    return urlNode.asText();
-                }
+        JsonNode root = mapper.readTree(raw);
+        JsonNode data = root.get("data");
+        if (data != null && data.isArray() && data.size() > 0) {
+            JsonNode urlNode = data.get(0).get("url");
+            if (urlNode != null) {
+                return urlNode.asText();
             }
-            throw new RuntimeException("generateCover() OpenAI 응답구조가 예상과 다릅니다: " + raw);
         }
+        throw new RuntimeException("generateCover() OpenAI 응답구조가 예상과 다릅니다: " + raw);
     }
+}
+
+
+/**
+ * 500자 이내 요약, 영어 2문장
+ */
+public String summarizeContent_1(String content) throws Exception {
+    RequestBody body = RequestBody.create(
+        mapper.writeValueAsString(Map.of(
+            "model", "gpt-4o-mini",
+            "messages", List.of(
+                Map.of(
+                    "role", "system",
+                    "content",
+                        "너는 이미지 생성 AI에게 줄 키워드 프롬프트 생성 도우미야. "
+                    + "책 내용을 보고 theme, style, colors, composition, mood, details 를 반드시 영어 단어(키워드)로만, 쉼표(,)로 나열해줘. 문장은 쓰지 마. 1000자 이내."
+
+                ),
+                Map.of("role", "user", "content", content)
+            )
+        )),
+        MediaType.parse("application/json")
+    );
+
+    Request request = new Request.Builder()
+        .url(openaiApiUrl)
+        .addHeader("Authorization", "Bearer " + openaiApiKey)
+        .post(body)
+        .build();
+
+    try (Response response = client.newCall(request).execute()) {
+        String raw = response.body().string();
+        System.out.println("OpenAI 요약 응답: " + raw);
+
+        JsonNode root = mapper.readTree(raw);
+        JsonNode choices = root.get("choices");
+        if (choices != null && choices.isArray() && choices.size() > 0) {
+            JsonNode contentNode = choices.get(0).get("message").get("content");
+            if (contentNode != null) {
+                return contentNode.asText();
+            }
+        }
+        throw new RuntimeException("summarizeContent_1() OpenAI 응답구조가 예상과 다릅니다: " + raw);
+    }
+}
+
 
     /**
      * 3) 가격 측정
@@ -215,8 +237,7 @@ public class AiClient {
         // 2. 이미지
         String imageUrl = generateCover(
                 publishing.getTitle(),
-                publishing.getContent(),
-                publishing.getCategory()
+                publishing.getContent()
         );
         publishing.setImage(imageUrl);
 
