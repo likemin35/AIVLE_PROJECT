@@ -32,8 +32,7 @@ public class PublishingService {
 
             String imageUrl = aiClient.generateCover(
                 event.getTitle(),
-                event.getContent(),
-                publishing.getCategory()
+                event.getContent()
             );
             publishing.setImage(imageUrl);
 
