@@ -22,7 +22,7 @@ public class AiController {
 
     @PostMapping("/cover")
     public ResponseEntity<String> cover(@RequestBody BookDto book) throws Exception {
-        String imageUrl = aiClient.generateCover(book.getTitle(), book.getContent(), book.getCategory());
+        String imageUrl = aiClient.generateCover(book.getTitle(), book.getContent());
 
         return ResponseEntity.ok(imageUrl);
     }
