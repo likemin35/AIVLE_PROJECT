@@ -26,7 +26,7 @@ public class PublishingController {
         // 2. AI 를 통해 후처리
         String summary = aiClient.summarizeContent(saved.getContent(), saved.getCategory());
 
-        String image = aiClient.generateCover(saved.getTitle(),saved.getContent(), saved.getCategory());
+        String image = aiClient.generateCover(saved.getTitle(),saved.getContent());
         int cost = aiClient.predictBookPrice(
             saved.getContent(),
             saved.getCategory(),
